@@ -4,10 +4,13 @@ project(cepton)
 add_definitions(-std=c++11)
 
 find_package(catkin REQUIRED COMPONENTS
+  angles
   pcl_conversions
   pcl_ros
   roscpp
-  std_msgs)
+  roslib
+  std_msgs
+  tf)
 
 catkin_package(
 #  INCLUDE_DIRS include
