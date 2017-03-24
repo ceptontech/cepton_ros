@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package>
   <name>cepton</name>
-  <version>0.0.0</version>
+  <version>0.1.0</version>
   <description>Cepton lidar</description>
 
   <maintainer email="jon.allen@ceptontech.com">Jonathan Allen</maintainer>
