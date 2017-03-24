@@ -11,7 +11,5 @@ int main(int argc, char **argv) {
 
   ros::spin();
 
-  point_cloud_publisher.close();
-
   return 0;
 }
