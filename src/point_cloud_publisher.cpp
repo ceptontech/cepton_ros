@@ -93,7 +93,7 @@ void PointCloudPublisher::on_receive(int error_code,
       new cepton_pcl::CeptonPointCloud());
   point_cloud_ptr->reserve(n_points);
   point_cloud_ptr->header.stamp = pcl_conversions::toPCL(ros::Time::now());
-  point_cloud_ptr->header.frame_id = "cepton_frame";
+  point_cloud_ptr->header.frame_id = "cepton_frame_" + sensor_name;
   point_cloud_ptr->height = 1;
 
   for (std::size_t i_point = 0; i_point < n_points; ++i_point) {
