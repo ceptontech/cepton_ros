@@ -1,0 +1,7 @@
+<launch>
+    <include file="$(find cepton)/launch/cepton.launch">
+        <arg name="combine_sensors" value="true" />
+    </include>
+
+    <node pkg="tf" type="static_transform_publisher" name="cepton_transform" args="1 0 0 0 0 0 1 map cepton 100" />
+</launch>

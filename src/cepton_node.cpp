@@ -1,15 +1,13 @@
 #include <ros/ros.h>
 
-#include "cepton_ros/point_cloud_publisher.hpp"
+#include "cepton_ros/driver.hpp"
 
-int main(int argc, char **argv) {
-  ros::init(argc, argv, "cepton");
+int main(int argc, char** argv) {
+  ros::init(argc, argv, "cepton_node");
   ros::NodeHandle node_handle;
+  ros::NodeHandle private_node_handle("~");
 
-  auto& point_cloud_publisher =
-      cepton_ros::PointCloudPublisher::initialize(node_handle);
+  cepton_ros::Driver::initialize(node_handle, private_node_handle);
 
   ros::spin();
-
-  return 0;
 }

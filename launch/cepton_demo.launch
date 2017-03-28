@@ -1,0 +1,6 @@
+<launch>
+    <include file="$(find cepton)/launch/cepton_single_sensor.launch">
+    </include>
+
+    <node pkg="rviz" type="rviz" name="cepton_rviz" args="-d $(find cepton)/rviz/cepton.rviz -f cepton" />
+</launch>
