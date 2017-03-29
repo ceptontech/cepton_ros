@@ -3,9 +3,9 @@
     <arg name="parent_frame_id" default="world" doc="parent transform frame" />
 
     <!-- Launch driver -->
-    <include file="$(find cepton)/launch/driver_single.launch" >
-      <arg name="name_prefix" value="$(arg name_prefix)" />
-      <arg name="parent_frame_id" value="$(arg parent_frame_id)" />
+    <include file="$(find cepton)/launch/driver_single.launch">
+        <arg name="name_prefix" value="$(arg name_prefix)" />
+        <arg name="parent_frame_id" value="$(arg parent_frame_id)" />
     </include>
 
     <!-- launch rviz -->

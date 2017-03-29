@@ -2,8 +2,8 @@
     <arg name="name_prefix" default="cepton" doc="prefix for names" />
 
     <!-- Launch driver -->
-    <include file="$(find cepton)/launch/driver_multi.launch" >
-      <arg name="transforms_path" value="$(arg transforms_path)" />
+    <include file="$(find cepton)/launch/driver_multi.launch">
+        <arg name="transforms_path" value="$(arg transforms_path)" />
     </include>
 
     <!-- launch rviz -->

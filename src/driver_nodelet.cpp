@@ -54,7 +54,8 @@ void DriverNodelet::onInit() {
   }
 }
 
-std::string DriverNodelet::get_sensor_topic_id(const std::string &sensor_name) const {
+std::string DriverNodelet::get_sensor_topic_id(
+    const std::string &sensor_name) const {
   if (combine_sensors_) {
     return (name_prefix_ + "_points");
   } else {
@@ -62,7 +63,8 @@ std::string DriverNodelet::get_sensor_topic_id(const std::string &sensor_name) c
   }
 }
 
-std::string DriverNodelet::get_sensor_frame_id(const std::string &sensor_name) const {
+std::string DriverNodelet::get_sensor_frame_id(
+    const std::string &sensor_name) const {
   if (combine_sensors_) {
     return name_prefix_;
   } else {
@@ -70,7 +72,8 @@ std::string DriverNodelet::get_sensor_frame_id(const std::string &sensor_name) c
   }
 }
 
-ros::Publisher &DriverNodelet::get_sensor_publisher(const std::string &sensor_name) {
+ros::Publisher &DriverNodelet::get_sensor_publisher(
+    const std::string &sensor_name) {
   if (combine_sensors_) {
     return combined_publisher_;
   } else {
@@ -84,9 +87,10 @@ ros::Publisher &DriverNodelet::get_sensor_publisher(const std::string &sensor_na
   }
 }
 
-void DriverNodelet::on_receive_(int error_code, CeptonSensorHandle sensor_handle,
-                         std::size_t n_points,
-                         CeptonSensorPoint const *points) {
+void DriverNodelet::on_receive_(int error_code,
+                                CeptonSensorHandle sensor_handle,
+                                std::size_t n_points,
+                                CeptonSensorPoint const *points) {
   if (error_code < 0) {
     NODELET_WARN("on_receive failed: %i", error_code);
   }
@@ -118,9 +122,9 @@ void DriverNodelet::on_receive_(int error_code, CeptonSensorHandle sensor_handle
   get_sensor_publisher(sensor_name).publish(point_cloud_ptr);
 }
 
-void DriverNodelet::on_event_(int error_code, CeptonSensorHandle sensor_handle,
-                       CeptonSensorInformation const *sensor_information_ptr,
-                       int sensor_event) {
+void DriverNodelet::on_event_(
+    int error_code, CeptonSensorHandle sensor_handle,
+    CeptonSensorInformation const *sensor_information_ptr, int sensor_event) {
   if (error_code < 0) {
     NODELET_WARN("on_event failed: %i", error_code);
     return;

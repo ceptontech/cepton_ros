@@ -15,7 +15,7 @@
 namespace cepton_ros {
 
 class DriverNodelet : public nodelet::Nodelet {
-private:
+ private:
   ros::NodeHandle node_handle_;
   ros::NodeHandle private_node_handle_;
 
@@ -26,7 +26,7 @@ private:
   std::map<std::string, ros::Publisher> sensor_publishers_;
   tf::TransformBroadcaster transform_broadcaster_;
 
-public:
+ public:
   ~DriverNodelet();
 
   std::string get_sensor_topic_id(const std::string &sensor_name) const;
@@ -39,7 +39,7 @@ public:
                  CeptonSensorInformation const *sensor_information_ptr,
                  int sensor_event);
 
-protected:
-   void onInit() override;
+ protected:
+  void onInit() override;
 };
 }

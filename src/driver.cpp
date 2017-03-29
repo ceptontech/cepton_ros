@@ -5,7 +5,7 @@
 namespace cepton_ros {
 
 void driver_on_receive_(int error_code, CeptonSensorHandle sensor_handle,
-                 std::size_t n_points, CeptonSensorPoint const *points) {
+                        std::size_t n_points, CeptonSensorPoint const *points) {
   auto &driver = cepton_ros::Driver::get_instance();
   std::lock_guard<std::mutex> lock(driver.internal_mutex_);
 
@@ -15,8 +15,8 @@ void driver_on_receive_(int error_code, CeptonSensorHandle sensor_handle,
 }
 
 void driver_on_event_(int error_code, CeptonSensorHandle sensor_handle,
-               CeptonSensorInformation const *sensor_information_ptr,
-               int sensor_event) {
+                      CeptonSensorInformation const *sensor_information_ptr,
+                      int sensor_event) {
   auto &driver = cepton_ros::Driver::get_instance();
   std::lock_guard<std::mutex> lock(driver.internal_mutex_);
 
@@ -26,9 +26,7 @@ void driver_on_event_(int error_code, CeptonSensorHandle sensor_handle,
   }
 }
 
-Driver::~Driver() {
-  deinitialize();
-}
+Driver::~Driver() { deinitialize(); }
 
 Driver &Driver::get_instance() {
   static Driver instance;
@@ -39,7 +37,7 @@ Driver &Driver::get_instance() {
 bool Driver::initialize(OnReceiveCallback on_receive_callback,
                         OnEventCallback on_event_callback) {
   std::lock_guard<std::mutex> lock(internal_mutex_);
-  
+
   if (initialized_) {
     return false;
   }
