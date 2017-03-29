@@ -13,6 +13,7 @@ set(CEPTON_CATKIN_DEPENDS
   pluginlib
   roscpp
   roslib
+  rospy
   std_msgs
   tf
 )
@@ -28,39 +29,20 @@ link_directories("${CEPTON_SDK_DIR}/lib")
 # -------
 include_directories(include)
 
-# Driver
-set(CEPTON_ROS_DRIVER_SOURCES
+# Cepton ROS
+set(CEPTON_ROS_SOURCES
   src/driver.cpp
+  src/driver_nodelet.cpp
 )
-add_library(cepton_ros_driver ${CEPTON_ROS_DRIVER_SOURCES})
-target_link_libraries(cepton_ros_driver
+add_library(cepton_ros ${CEPTON_ROS_SOURCES})
+target_link_libraries(cepton_ros
   ${catkin_LIBRARIES}
   cepton_sdk
 )
 
-# Driver nodelet
-set(CEPTON_ROS_DRIVER_NODELET_SOURCES
-  src/driver_nodelet.cpp
-)
-add_library(cepton_ros_driver_nodelet ${CEPTON_ROS_DRIVER_NODELET_SOURCES})
-target_link_libraries(cepton_ros_driver_nodelet
-  ${catkin_LIBRARIES}
-  cepton_ros_driver
-)
-
-# Cepton node
-set(CEPTON_ROS_NODE_SOURCES
-  src/cepton_node.cpp
-)
-add_executable(cepton_ros_node ${CEPTON_ROS_NODE_SOURCES})
-target_link_libraries(cepton_ros_node
-  ${catkin_LIBRARIES}
-  cepton_ros_driver
-)
-
 set(CEPTON_ROS_LIBRARIES
-  cepton_ros_driver
-cepton_ros_driver_nodelet)
+  cepton_ros
+)
 
 # Install
 # -------
@@ -79,6 +61,11 @@ foreach(LIB ${CEPTON_ROS_LIBRARIES})
     LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   )
 endforeach(LIB)
+
+# Configurations
+install(DIRECTORY config/
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/config
+)
 
 # Includes
 install(DIRECTORY include/cepton/

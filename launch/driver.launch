@@ -1,17 +1,16 @@
 <launch>
-    <arg name="name_prefix" default="cepton" />
-    <arg name="combine_sensors" default="false" />
+    <arg name="combine_sensors" default="false" doc="use single topic and transform frame, rather than one per sensor" />
+    <arg name="name_prefix" default="cepton" doc="prefix for names" />
 
-    <arg name="manager" default="$(arg name_prefix)_manager" />
-    <arg name="driver" default="$(arg name_prefix)_driver" />
+    <!-- launch nodelet manager -->
+    <arg name="manager_node_name" value="$(arg name_prefix)_manager" />
+    <node pkg="nodelet" type="nodelet" name="$(arg manager_node_name)" args="manager" output="screen" />
 
-    <!-- start nodelet manager -->
-    <node pkg="nodelet" type="nodelet" name="$(arg manager)" args="manager" output="screen" />
-
-    <!-- start driver -->
-    <node pkg="nodelet" type="nodelet" name="$(arg driver)" args="load cepton/DriverNodelet $(arg manager)" output="screen">
-        <param name="name_prefix" value="$(arg name_prefix)" />
+    <!-- launch driver -->
+    <arg name="driver_node_name" value="$(arg name_prefix)_driver" />
+    <node pkg="nodelet" type="nodelet" name="$(arg driver_node_name)" args="load cepton/DriverNodelet $(arg manager_node_name)" output="screen">
         <param name="combine_sensors" value="$(arg combine_sensors)" />
+        <param name="name_prefix" value="$(arg name_prefix)" />
     </node>
 
 </launch>

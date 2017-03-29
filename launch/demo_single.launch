@@ -1,0 +1,14 @@
+<launch>
+    <arg name="name_prefix" default="cepton" doc="prefix for names" />
+    <arg name="parent_frame_id" default="world" doc="parent transform frame" />
+
+    <!-- Launch driver -->
+    <include file="$(find cepton)/launch/driver_single.launch" >
+      <arg name="name_prefix" value="$(arg name_prefix)" />
+      <arg name="parent_frame_id" value="$(arg parent_frame_id)" />
+    </include>
+
+    <!-- launch rviz -->
+    <arg name="rviz_node_name" value="$(arg name_prefix)_rviz" />
+    <node pkg="rviz" type="rviz" name="$(arg rviz_node_name)" args="-d $(find cepton)/config/demo.rviz -f world" />
+</launch>
