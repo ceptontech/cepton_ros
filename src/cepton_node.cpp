@@ -1,6 +1,6 @@
 #include <ros/ros.h>
 
-#include "cepton_ros/driver.hpp"
+#include "cepton/ros/driver.hpp"
 
 int main(int argc, char** argv) {
   ros::init(argc, argv, "cepton_node");

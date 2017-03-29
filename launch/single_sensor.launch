@@ -1,5 +1,5 @@
 <launch>
-    <include file="$(find cepton)/launch/cepton.launch">
+    <include file="$(find cepton)/launch/driver.launch">
         <arg name="combine_sensors" value="true" />
     </include>
 

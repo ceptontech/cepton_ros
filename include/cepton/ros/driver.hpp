@@ -12,7 +12,7 @@
 
 #include <cepton_sdk.h>
 
-#include "cepton_pcl/point.hpp"
+#include "cepton/pcl/point.hpp"
 
 namespace cepton_ros {
 
