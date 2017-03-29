@@ -6,16 +6,11 @@ This package provides ROS support for the Cepton LIDAR sensor.
 
 ### Driver nodelet
 
-The `driver_nodelet` is a thin wrapper around the Cepton driver, and publishes PointCloud2 topics for each sensor. The point type definition can be found in `include/cepton_pcl/point.hpp`. It has the following fields:
+The driver nodelet is a thin wrapper around the Cepton driver, and publishes PointCloud2 topics for each sensor. The point type definition can be found in `include/cepton_pcl/point.hpp`. It has the following fields:
 
   - timestamp (uint64_t)
   - x, y, z (float)
   - intensity (float)
-
-**Node parameters:**
-
-- combine_sensors: use single topic and transform frame, rather than one per sensor (default: "false")
-- name_prefix: prefix for sensor topics and transform frames (default: "cepton")
 
 ## Installation
 
@@ -26,7 +21,7 @@ Change to the catkin workspace directory.
 Clone the Cepton code
 
     $ git clone git@github.com:ceptontech/cepton_ros.git src/cepton
-    
+
 Build the code
 
     $ catkin_make
@@ -35,4 +30,4 @@ Build the code
 
 The best place to start, is to launch the demo (`roscore` must be running already)
 
-    $ roslaunch cepton demo.launch
+    $ roslaunch cepton demo_single.launch
