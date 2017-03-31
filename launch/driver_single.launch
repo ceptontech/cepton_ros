@@ -9,6 +9,6 @@
     </include>
 
     <!-- Launch transform publisher -->
-    <args name="frame_id" value="$(arg name_prefix)" />
+    <arg name="frame_id" value="$(arg name_prefix)" />
     <node pkg="tf" type="static_transform_publisher" name="cepton_transform" args="0 0 0 0 0 0 $(arg parent_frame_id) $(arg frame_id) 100" />
 </launch>
