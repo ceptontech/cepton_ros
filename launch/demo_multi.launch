@@ -1,5 +1,5 @@
 <launch>
-    <arg name="name_prefix" default="cepton" doc="prefix for names" />
+    <arg name="namespace" default="cepton" doc="prefix for names" />
 
     <!-- Launch driver -->
     <include file="$(find cepton)/launch/driver_multi.launch">
@@ -7,6 +7,6 @@
     </include>
 
     <!-- launch rviz -->
-    <arg name="rviz_node_name" value="$(arg name_prefix)_rviz" />
+    <arg name="rviz_node_name" value="$(arg namespace)_rviz" />
     <node pkg="rviz" type="rviz" name="$(arg rviz_node_name)" args="-d $(find cepton)/config/demo.rviz -f world" />
 </launch>

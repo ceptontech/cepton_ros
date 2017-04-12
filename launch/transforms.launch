@@ -1,14 +1,14 @@
 <launch>
     <arg name="transforms_path" doc="transforms json file path" />
-    <arg name="name_prefix" default="cepton" doc="prefix for transform frames" />
+    <arg name="namespace" default="cepton" doc="prefix for transform frames" />
     <arg name="parent_frame_id" default="world" doc="parent transform frame" />
     <arg name="rate" default="10" doc="output rate" />
 
     <!-- start transforms -->
-    <arg name="transforms_node_name" value="$(arg name_prefix)_transforms" />
+    <arg name="transforms_node_name" value="$(arg namespace)_transforms" />
     <node pkg="cepton" type="transforms_node.py" name="$(arg transforms_node_name)" output="screen">
         <param name="file_path" value="$(arg transforms_path)" />
-        <param name="name_prefix" value="$(arg name_prefix)" />
+        <param name="namespace" value="$(arg namespace)" />
         <param name="rate" value="$(arg rate)" />
         <param name="parent_frame_id" value="$(arg parent_frame_id)" />
     </node>

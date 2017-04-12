@@ -7,11 +7,6 @@ import tf
 
 
 class TransformsNode(object):
-    ROTATION_CONVERSION = {
-        "euler": lambda x: tf.transformations.quaternion_from_euler(x[0], x[1], x[2]),
-        "quaternion": lambda x: x
-    }
-
     def __init__(self):
         rospy.init_node("cepton_transforms")
         self.rate = rospy.Rate(rospy.get_param("~rate", 10))
@@ -26,21 +21,17 @@ class TransformsNode(object):
             with open(file_path, "r") as transforms_file:
                 self.transforms_dict = json.load(transforms_file)
 
+    def get_sensor_frame_id(self, sensor_name):
+        return "{}_{}".format(self.name_prefix, sensor_name)
+
     def publish_transforms(self):
         for sensor_name, transform in self.transforms_dict.items():
             translation = transform["translation"]
+            rotation = transform["rotation"]
 
-            if transform["rotation_type"] not in TransformsNode.ROTATION_CONVERSION:
-                rospy.logerr_throttle(60, "invalid rotation type: {}".format(
-                    transform["rotation_type"]))
-                return
-            rotation = \
-                TransformsNode.ROTATION_CONVERSION[transform["rotation_type"]](
-                    transform["rotation"])
-
-            frame_id = "cepton_{}".format(sensor_name)
+            frame_id = self.get_sensor_frame_id(sensor_name)
             self.transform_broadcaster.sendTransform(
-                translation, rotation, rospy.Time.now(), self.parent_frame_id, self.parent_frame_id)
+                translation, rotation, rospy.Time.now(), frame_id, self.parent_frame_id)
 
     def run(self):
         while not rospy.is_shutdown():

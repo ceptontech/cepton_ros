@@ -19,7 +19,7 @@ class DriverNodelet : public nodelet::Nodelet {
   ros::NodeHandle node_handle_;
   ros::NodeHandle private_node_handle_;
 
-  std::string name_prefix_;
+  std::string ros_namespace_;
   bool combine_sensors_;
 
   ros::Publisher combined_publisher_;

@@ -1,14 +1,14 @@
 <launch>
-    <arg name="name_prefix" default="cepton" doc="prefix for names" />
+    <arg name="namespace" default="cepton" doc="prefix for names" />
     <arg name="parent_frame_id" default="world" doc="parent transform frame" />
 
     <!-- Launch driver -->
     <include file="$(find cepton)/launch/driver.launch">
         <arg name="combine_sensors" value="true" />
-        <arg name="name_prefix" value="$(arg name_prefix)" />
+        <arg name="namespace" value="$(arg namespace)" />
     </include>
 
     <!-- Launch transform publisher -->
-    <arg name="frame_id" value="$(arg name_prefix)" />
+    <arg name="frame_id" value="$(arg namespace)" />
     <node pkg="tf" type="static_transform_publisher" name="cepton_transform" args="0 0 0 0 0 0 $(arg parent_frame_id) $(arg frame_id) 100" />
 </launch>
