@@ -23,7 +23,10 @@ include_directories(SYSTEM ${catkin_INCLUDE_DIRS})
 # Cepton SDK
 set(CEPTON_SDK_DIR "${PROJECT_SOURCE_DIR}/third_party/cepton_sdk")
 include_directories(SYSTEM "${CEPTON_SDK_DIR}/include")
-link_directories("${CEPTON_SDK_DIR}/lib")
+find_library(CEPTON_SDK_LIBRARIES NAMES cepton_sdk PATHS "${CEPTON_SDK_DIR}/lib")
+
+set(CEPTON_ROS_EXTERNAL_LIBRARIES
+  ${CEPTON_SDK_LIBRARIES})
 
 # Targets
 # -------
@@ -37,7 +40,7 @@ set(CEPTON_ROS_SOURCES
 add_library(cepton_ros ${CEPTON_ROS_SOURCES})
 target_link_libraries(cepton_ros
   ${catkin_LIBRARIES}
-  cepton_sdk
+  ${CEPTON_SDK_LIBRARIES}
 )
 
 set(CEPTON_ROS_LIBRARIES
@@ -50,7 +53,7 @@ catkin_package(
   CATKIN_DEPENDS ${CEPTON_CATKIN_DEPENDS}
   DEPENDS
   INCLUDE_DIRS include
-  LIBRARIES ${CEPTON_ROS_LIBRARIES}
+  LIBRARIES ${CEPTON_ROS_EXTERNAL_LIBRARIES} ${CEPTON_ROS_LIBRARIES}
 )
 
 # Libraries
@@ -59,6 +62,12 @@ foreach(LIB ${CEPTON_ROS_LIBRARIES})
     ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
     RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
     LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  )
+endforeach(LIB)
+
+foreach(LIB ${CEPTON_ROS_EXTERNAL_LIBRARIES})
+  install(FILES ${LIB}
+    DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   )
 endforeach(LIB)
 

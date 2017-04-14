@@ -1,37 +1,37 @@
 <?xml version="1.0"?>
 <package>
-  <name>cepton</name>
-  <version>0.1.0</version>
-  <description>ROS package for Cepton LIDAR.</description>
-  <license>MIT</license>
-  <url type="website">http://wiki.ros.org/cepton</url>
-  <url type="repository">https://github.com/ceptontech/cepton_ros.git</url>
-  <maintainer email="jon.allen@ceptontech.com">Jonathan Allen</maintainer>
-  <author email="jon.allen@ceptontech.com">Jonathan Allen</author>
+    <name>cepton</name>
+    <version>0.1.0</version>
+    <description>ROS package for Cepton LIDAR.</description>
+    <license>MIT</license>
+    <url type="website">http://wiki.ros.org/cepton</url>
+    <url type="repository">https://github.com/ceptontech/cepton_ros.git</url>
+    <maintainer email="jon.allen@ceptontech.com">Jonathan Allen</maintainer>
+    <author email="jon.allen@ceptontech.com">Jonathan Allen</author>
 
-  <buildtool_depend>catkin</buildtool_depend>
+    <buildtool_depend>catkin</buildtool_depend>
 
-  <build_depend>nodelet</build_depend>
-  <build_depend>pcl_conversions</build_depend>
-  <build_depend>pcl_ros</build_depend>
-  <build_depend>pluginlib</build_depend>
-  <build_depend>roscpp</build_depend>
-  <build_depend>roslib</build_depend>
-  <build_depend>rospy</build_depend>
-  <build_depend>std_msgs</build_depend>
-  <build_depend>tf</build_depend>
+    <build_depend>nodelet</build_depend>
+    <build_depend>pcl_conversions</build_depend>
+    <build_depend>pcl_ros</build_depend>
+    <build_depend>pluginlib</build_depend>
+    <build_depend>roscpp</build_depend>
+    <build_depend>roslib</build_depend>
+    <build_depend>rospy</build_depend>
+    <build_depend>std_msgs</build_depend>
+    <build_depend>tf</build_depend>
 
-  <run_depend>nodelet</run_depend>
-  <run_depend>pcl_conversions</run_depend>
-  <run_depend>pcl_ros</run_depend>
-  <run_depend>pluginlib</run_depend>
-  <run_depend>roscpp</run_depend>
-  <run_depend>roslib</run_depend>
-  <run_depend>rospy</run_depend>
-  <run_depend>std_msgs</run_depend>
-  <run_depend>tf</run_depend>
+    <run_depend>nodelet</run_depend>
+    <run_depend>pcl_conversions</run_depend>
+    <run_depend>pcl_ros</run_depend>
+    <run_depend>pluginlib</run_depend>
+    <run_depend>roscpp</run_depend>
+    <run_depend>roslib</run_depend>
+    <run_depend>rospy</run_depend>
+    <run_depend>std_msgs</run_depend>
+    <run_depend>tf</run_depend>
 
-  <export>
-    <nodelet plugin="${prefix}/nodelets.xml" />
-  </export>
+    <export>
+        <nodelet plugin="${prefix}/nodelets.xml"/>
+    </export>
 </package>
