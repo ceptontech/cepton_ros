@@ -21,6 +21,7 @@ private:
 
   std::string ros_namespace_ = "cepton";
   bool combine_sensors_ = false;
+  bool output_frames_ = true;
 
   ros::Publisher combined_publisher_;
   std::map<std::string, ros::Publisher> sensor_publishers_;

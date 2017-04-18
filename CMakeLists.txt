@@ -7,6 +7,7 @@ add_definitions(-std=c++11)
 # ------------------
 # Catkin
 set(CEPTON_CATKIN_DEPENDS
+  message_generation
   nodelet
   pcl_conversions
   pcl_ros
@@ -33,6 +34,14 @@ set(CEPTON_ROS_EXTERNAL_LIBRARIES
 include_directories(include)
 
 # Cepton ROS
+add_message_files(
+  FILES
+  sensor_information.msg
+)
+generate_messages(
+  DEPENDENCIES
+  std_msgs
+)
 set(CEPTON_ROS_SOURCES
   src/driver.cpp
   src/driver_nodelet.cpp

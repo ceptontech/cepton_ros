@@ -8,11 +8,11 @@ namespace {
 
 const std::size_t message_buffer_size_ = 10;
 
-std::string
-get_sensor_name_(const CeptonSensorInformation &sensor_information) {
+std::string get_sensor_name_(
+    const CeptonSensorInformation &sensor_information) {
   return std::to_string(sensor_information.serial_number);
 }
-} // namespace
+}  // namespace
 
 namespace cepton_ros {
 
@@ -29,6 +29,7 @@ void DriverNodelet::onInit() {
   private_node_handle_.param("namespace", ros_namespace_, ros_namespace_);
   private_node_handle_.param("combine_sensors", combine_sensors_,
                              combine_sensors_);
+  private_node_handle_.param("output_frames", output_frames_, output_frames_);
 
   if (combine_sensors_) {
     combined_publisher_ = node_handle_.advertise<sensor_msgs::PointCloud2>(
@@ -49,13 +50,14 @@ void DriverNodelet::onInit() {
                          sensor_event);
       };
   auto &driver = cepton_ros::Driver::get_instance();
-  if (!driver.initialize(on_receive_callback, on_event_callback)) {
+  if (!driver.initialize(on_receive_callback, on_event_callback,
+                         output_frames_)) {
     NODELET_FATAL("driver initialization failed");
   }
 }
 
-std::string
-DriverNodelet::get_sensor_topic_id(const std::string &sensor_name) const {
+std::string DriverNodelet::get_sensor_topic_id(
+    const std::string &sensor_name) const {
   if (combine_sensors_) {
     return (ros_namespace_ + "_points");
   } else {
@@ -63,8 +65,8 @@ DriverNodelet::get_sensor_topic_id(const std::string &sensor_name) const {
   }
 }
 
-std::string
-DriverNodelet::get_sensor_frame_id(const std::string &sensor_name) const {
+std::string DriverNodelet::get_sensor_frame_id(
+    const std::string &sensor_name) const {
   if (combine_sensors_) {
     return ros_namespace_;
   } else {
@@ -72,8 +74,8 @@ DriverNodelet::get_sensor_frame_id(const std::string &sensor_name) const {
   }
 }
 
-ros::Publisher &
-DriverNodelet::get_sensor_publisher(const std::string &sensor_name) {
+ros::Publisher &DriverNodelet::get_sensor_publisher(
+    const std::string &sensor_name) {
   if (combine_sensors_) {
     return combined_publisher_;
   } else {
@@ -142,14 +144,14 @@ void DriverNodelet::on_event_(
   std::string sensor_name = get_sensor_name_(*sensor_information_ptr);
 
   switch (sensor_event) {
-  case CEPTON_EVENT_ATTACH:
-    NODELET_INFO("sensor connected: %s", sensor_name.c_str());
-    break;
-  case CEPTON_EVENT_DETACH:
-    NODELET_INFO("sensor disconnected: %s", sensor_name.c_str());
-    break;
-  case CEPTON_EVENT_FRAME:
-    break;
+    case CEPTON_EVENT_ATTACH:
+      NODELET_INFO("sensor connected: %s", sensor_name.c_str());
+      break;
+    case CEPTON_EVENT_DETACH:
+      NODELET_INFO("sensor disconnected: %s", sensor_name.c_str());
+      break;
+    case CEPTON_EVENT_FRAME:
+      break;
   }
 }
-} // namespace cepton_ros
+}  // namespace cepton_ros

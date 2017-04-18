@@ -1,6 +1,7 @@
 <launch>
     <arg name="combine_sensors" default="false" doc="use single topic and transform frame, rather than one per sensor" />
     <arg name="namespace" default="cepton" doc="prefix for names" />
+    <arg name="output_frames" default="true" doc="if true, outputs frames, otherwise, outputs scanlines" />
 
     <!-- launch nodelet manager -->
     <arg name="manager_node_name" value="$(arg namespace)_manager" />
