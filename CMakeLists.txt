@@ -36,7 +36,7 @@ include_directories(include)
 # Cepton ROS
 add_message_files(
   FILES
-  sensor_information.msg
+  SensorInformation.msg
 )
 generate_messages(
   DEPENDENCIES

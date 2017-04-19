@@ -17,13 +17,13 @@ class Driver {
       int, CeptonSensorHandle, CeptonSensorInformation const *, int)>;
 
  private:
-  std::shared_ptr<Driver> instance_ptr_;
+  std::shared_ptr<Driver> instance_ptr;
 
-  std::atomic<bool> initialized_{false};
-  std::mutex internal_mutex_;
+  std::atomic<bool> initialized{false};
+  std::mutex internal_mutex;
 
-  OnReceiveCallback on_receive_callback_;
-  OnEventCallback on_event_callback_;
+  OnReceiveCallback on_receive_callback;
+  OnEventCallback on_event_callback;
 
  public:
   Driver() = default;
@@ -37,12 +37,12 @@ class Driver {
                   OnEventCallback on_event_callback, bool listen_frames);
   void deinitialize();
 
-  friend void driver_on_receive_(int error_code,
-                                 CeptonSensorHandle sensor_handle,
-                                 std::size_t n_points,
-                                 CeptonSensorPoint const *points);
-  friend void driver_on_event_(
+  friend void driver_on_receive(int error_code,
+                                CeptonSensorHandle sensor_handle,
+                                std::size_t n_points,
+                                CeptonSensorPoint const *points);
+  friend void driver_on_event(
       int error_code, CeptonSensorHandle sensor_handle,
       CeptonSensorInformation const *sensor_information_ptr, int sensor_event);
 };
-}
+}  // namespace cepton_ros

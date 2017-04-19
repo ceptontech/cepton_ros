@@ -1,17 +1,18 @@
 <launch>
-    <arg name="combine_sensors" default="false" doc="use single topic and transform frame, rather than one per sensor" />
-    <arg name="namespace" default="cepton" doc="prefix for names" />
-    <arg name="output_frames" default="true" doc="if true, outputs frames, otherwise, outputs scanlines" />
+    <arg name="combine_sensors" default="false" doc="use single topic and transform frame, rather than one per sensor"/>
+    <arg name="namespace" default="cepton" doc="prefix for names"/>
+    <arg name="output_scanlines" default="false" doc="if true, outputs scanlines, otherwise, output frames"/>
 
     <!-- launch nodelet manager -->
-    <arg name="manager_node_name" value="$(arg namespace)_manager" />
-    <node pkg="nodelet" type="nodelet" name="$(arg manager_node_name)" args="manager" output="screen" />
+    <arg name="manager_node_name" value="$(arg namespace)_manager"/>
+    <node pkg="nodelet" type="nodelet" name="$(arg manager_node_name)" args="manager" output="screen"/>
 
     <!-- launch driver -->
-    <arg name="driver_node_name" value="$(arg namespace)_driver" />
+    <arg name="driver_node_name" value="$(arg namespace)_driver"/>
     <node pkg="nodelet" type="nodelet" name="$(arg driver_node_name)" args="load cepton_ros/DriverNodelet $(arg manager_node_name)" output="screen">
-        <param name="combine_sensors" value="$(arg combine_sensors)" />
-        <param name="namespace" value="$(arg namespace)" />
+        <param name="combine_sensors" value="$(arg combine_sensors)"/>
+        <param name="namespace" value="$(arg namespace)"/>
+        <param name="output_scanlines" value="$(arg output_scanlines)"/>
     </node>
 
 </launch>

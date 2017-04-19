@@ -1,28 +1,28 @@
-#include "cepton/ros/driver.hpp"
+#include "cepton_ros/driver.hpp"
 
 #include <ros/ros.h>
 
 namespace cepton_ros {
 
-void driver_on_receive_(int error_code, CeptonSensorHandle sensor_handle,
-                        std::size_t n_points, CeptonSensorPoint const *points) {
+void driver_on_receive(int error_code, CeptonSensorHandle sensor_handle,
+                       std::size_t n_points, CeptonSensorPoint const *points) {
   auto &driver = cepton_ros::Driver::get_instance();
-  std::lock_guard<std::mutex> lock(driver.internal_mutex_);
+  std::lock_guard<std::mutex> lock(driver.internal_mutex);
 
-  if (driver.on_receive_callback_) {
-    driver.on_receive_callback_(error_code, sensor_handle, n_points, points);
+  if (driver.on_receive_callback) {
+    driver.on_receive_callback(error_code, sensor_handle, n_points, points);
   }
 }
 
-void driver_on_event_(int error_code, CeptonSensorHandle sensor_handle,
-                      CeptonSensorInformation const *sensor_information_ptr,
-                      int sensor_event) {
+void driver_on_event(int error_code, CeptonSensorHandle sensor_handle,
+                     CeptonSensorInformation const *sensor_information_ptr,
+                     int sensor_event) {
   auto &driver = cepton_ros::Driver::get_instance();
-  std::lock_guard<std::mutex> lock(driver.internal_mutex_);
+  std::lock_guard<std::mutex> lock(driver.internal_mutex);
 
-  if (driver.on_event_callback_) {
-    driver.on_event_callback_(error_code, sensor_handle, sensor_information_ptr,
-                              sensor_event);
+  if (driver.on_event_callback) {
+    driver.on_event_callback(error_code, sensor_handle, sensor_information_ptr,
+                             sensor_event);
   }
 }
 
@@ -35,46 +35,47 @@ Driver &Driver::get_instance() {
 }
 
 bool Driver::initialize(OnReceiveCallback on_receive_callback,
-                        OnEventCallback on_event_callback, bool listen_frames) {
-  std::lock_guard<std::mutex> lock(internal_mutex_);
+                        OnEventCallback on_event_callback,
+                        bool listen_scanlines) {
+  std::lock_guard<std::mutex> lock(internal_mutex);
 
-  if (initialized_) {
+  if (initialized) {
     return false;
   }
 
-  this->on_receive_callback_ = on_receive_callback;
-  this->on_event_callback_ = on_event_callback;
+  this->on_receive_callback = on_receive_callback;
+  this->on_event_callback = on_event_callback;
 
   // Initialize sdk
   int error_code;
 
-  error_code = cepton_sdk_initialize(CEPTON_SDK_VERSION, 0, driver_on_event_);
+  error_code = cepton_sdk_initialize(CEPTON_SDK_VERSION, 0, driver_on_event);
   if (error_code < 0) {
     ROS_WARN("cepton_sdk_initialize failed [error code %i]", error_code);
     return false;
   }
 
-  if (listen_frames) {
-    error_code = cepton_sdk_listen_frames(driver_on_receive_);
+  if (listen_scanlines) {
+    error_code = cepton_sdk_listen_scanlines(driver_on_receive);
   } else {
-    error_code = cepton_sdk_listen_scanlines(driver_on_receive_);
+    error_code = cepton_sdk_listen_frames(driver_on_receive);
   }
   if (error_code < 0) {
     ROS_WARN("cepton_sdk_listen_frames failed [error code %i]", error_code);
     return false;
   }
 
-  initialized_.store(true);
+  initialized.store(true);
 
   return true;
 }
 
 void Driver::deinitialize() {
-  std::lock_guard<std::mutex> lock(internal_mutex_);
+  std::lock_guard<std::mutex> lock(internal_mutex);
 
-  if (initialized_) {
+  if (initialized) {
     cepton_sdk_deinitialize();
-    initialized_.store(false);
+    initialized.store(false);
   }
 }
-}
+}  // namespace cepton_ros

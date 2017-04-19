@@ -6,7 +6,7 @@
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 
-namespace cepton_pcl {
+namespace cepton_ros {
 
 // http://pointclouds.org/documentation/tutorials/adding_custom_ptype.php
 
@@ -18,10 +18,10 @@ struct CeptonPoint {
 } EIGEN_ALIGN16;
 
 using CeptonPointCloud = pcl::PointCloud<CeptonPoint>;
-}
+}  // namespace cepton_ros
 
 // clang-format off
-POINT_CLOUD_REGISTER_POINT_STRUCT(cepton_pcl::CeptonPoint,
+POINT_CLOUD_REGISTER_POINT_STRUCT(cepton_ros::CeptonPoint,
     (float, x, x)
     (float, y, y)
     (float, z, z)
