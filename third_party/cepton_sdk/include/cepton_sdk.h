@@ -46,13 +46,9 @@ struct CeptonLaserCalibration {
   int16_t image_offset_z;    // [encoder units]
   int16_t distance_offset;   // [fpga units]
 
-  int16_t image_min_x;  // [encoder units]
-  int16_t image_min_z;  // [encoder units]
-  int16_t image_max_x;  // [encoder units]
-  int16_t image_max_z;  // [encoder units]
-
   float image_scale_x;
   float image_scale_z;
+  float image_shear;
   float distance_scale;
   float focal_length;  // [m]
 };
@@ -93,9 +89,16 @@ struct CeptonSensorInformation {
   float last_reported_humidity; // %
   float last_reported_age; // hours
 
+  // Note: GPS timestamp reported here is GMT time
+  uint8_t gps_ts_year; // e.g. 2017 => 17
+  uint8_t gps_ts_month; // 1-12
+  uint8_t gps_ts_day; // 1-31
+  uint8_t gps_ts_hour; // 0-23
+  uint8_t gps_ts_min; // 0-59
+  uint8_t gps_ts_sec; // 0-59
+
   // Internal data, these will change over time, please don't depend on them
   struct CeptonSensorCalibration calibration;
-  uint64_t timestamp_offset;
 
   // Internal flags
   uint32_t is_mocked : 1; // Set if this device is created through cepton_sdk_mock_network_receive
@@ -123,7 +126,7 @@ int cepton_sdk_deinitialize();
 //--------------------------------------------
 // Receiving data from sensor
 struct CeptonSensorPoint {
-  uint64_t timestamp;  // Microseconds since last successful cepton_sdk_initialize()
+  uint64_t timestamp;  // Microseconds from start of epoch
   float x, y, z;       // These measurements in meters
   float intensity;     // 0-1 range
 };

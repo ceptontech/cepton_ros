@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package>
-    <name>cepton</name>
+    <name>cepton_ros</name>
     <version>0.1.0</version>
     <description>ROS package for Cepton LIDAR.</description>
     <license>MIT</license>

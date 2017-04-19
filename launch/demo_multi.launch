@@ -2,11 +2,11 @@
     <arg name="namespace" default="cepton" doc="prefix for names" />
 
     <!-- Launch driver -->
-    <include file="$(find cepton)/launch/driver_multi.launch">
+    <include file="$(find cepton_ros)/launch/driver_multi.launch">
         <arg name="transforms_path" value="$(arg transforms_path)" />
     </include>
 
     <!-- launch rviz -->
     <arg name="rviz_node_name" value="$(arg namespace)_rviz" />
-    <node pkg="rviz" type="rviz" name="$(arg rviz_node_name)" args="-d $(find cepton)/config/demo.rviz -f world" />
+    <node pkg="rviz" type="rviz" name="$(arg rviz_node_name)" args="-d $(find cepton_ros)/config/demo.rviz -f world" />
 </launch>

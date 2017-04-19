@@ -6,7 +6,7 @@
 
     <!-- start transforms -->
     <arg name="transforms_node_name" value="$(arg namespace)_transforms" />
-    <node pkg="cepton" type="transforms_node.py" name="$(arg transforms_node_name)" output="screen">
+    <node pkg="cepton_ros" type="transforms_node.py" name="$(arg transforms_node_name)" output="screen">
         <param name="file_path" value="$(arg transforms_path)" />
         <param name="namespace" value="$(arg namespace)" />
         <param name="rate" value="$(arg rate)" />

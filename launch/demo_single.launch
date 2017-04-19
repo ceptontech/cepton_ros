@@ -3,12 +3,12 @@
     <arg name="parent_frame_id" default="world" doc="parent transform frame"/>
 
     <!-- Launch driver -->
-    <include file="$(find cepton)/launch/driver_single.launch">
+    <include file="$(find cepton_ros)/launch/driver_single.launch">
         <arg name="namespace" value="$(arg namespace)"/>
         <arg name="parent_frame_id" value="$(arg parent_frame_id)"/>
     </include>
 
     <!-- launch rviz -->
     <arg name="rviz_node_name" value="$(arg namespace)_rviz" required="true"/>
-    <node pkg="rviz" type="rviz" name="$(arg rviz_node_name)" args="-d $(find cepton)/config/demo.rviz -f world"/>
+    <node pkg="rviz" type="rviz" name="$(arg rviz_node_name)" args="-d $(find cepton_ros)/config/demo.rviz -f world"/>
 </launch>

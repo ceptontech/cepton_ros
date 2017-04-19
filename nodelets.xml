@@ -1,5 +1,5 @@
 <library path="lib/libcepton_ros">
-    <class name="cepton/DriverNodelet" type="cepton_ros::DriverNodelet"
+    <class name="cepton_ros/DriverNodelet" type="cepton_ros::DriverNodelet"
       base_class_type="nodelet::Nodelet">
         <description>
             Cepton LIDAR driver.

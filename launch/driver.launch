@@ -9,7 +9,7 @@
 
     <!-- launch driver -->
     <arg name="driver_node_name" value="$(arg namespace)_driver" />
-    <node pkg="nodelet" type="nodelet" name="$(arg driver_node_name)" args="load cepton/DriverNodelet $(arg manager_node_name)" output="screen">
+    <node pkg="nodelet" type="nodelet" name="$(arg driver_node_name)" args="load cepton_ros/DriverNodelet $(arg manager_node_name)" output="screen">
         <param name="combine_sensors" value="$(arg combine_sensors)" />
         <param name="namespace" value="$(arg namespace)" />
     </node>
