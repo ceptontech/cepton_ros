@@ -9,6 +9,6 @@
     </include>
 
     <!-- launch rviz -->
-    <arg name="rviz_node_name" value="$(arg namespace)_rviz" required="true"/>
-    <node pkg="rviz" type="rviz" name="$(arg rviz_node_name)" args="-d $(find cepton_ros)/config/demo.rviz -f world"/>
+    <arg name="rviz_node_name" value="$(arg namespace)_rviz"/>
+    <node pkg="rviz" type="rviz" name="$(arg rviz_node_name)" required="true" args="-d $(find cepton_ros)/config/demo.rviz -f world"/>
 </launch>
