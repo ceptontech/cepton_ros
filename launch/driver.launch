@@ -1,5 +1,5 @@
 <launch>
-    <arg name="combine_sensors" default="false" doc="use single topic and transform frame, rather than one per sensor"/>
+    <arg name="combine_sensors" default="false" doc="if true, single topic and transform frame, otherwise one per sensor"/>
     <arg name="namespace" default="cepton" doc="prefix for names"/>
     <arg name="output_scanlines" default="false" doc="if true, outputs scanlines, otherwise, output frames"/>
 
@@ -14,5 +14,4 @@
         <param name="namespace" value="$(arg namespace)"/>
         <param name="output_scanlines" value="$(arg output_scanlines)"/>
     </node>
-
 </launch>

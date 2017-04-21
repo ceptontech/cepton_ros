@@ -12,7 +12,8 @@ class TransformsNode(object):
         self.rate = rospy.Rate(rospy.get_param("~rate", 10))
         self.transform_broadcaster = tf.TransformBroadcaster()
 
-        self.name_prefix = rospy.get_param("~name_prefix", "cepton")
+        self.combine_sensors = rospy.get_param("~combine_sensors", False)
+        self.ros_namespace = rospy.get_param("~namespace", "cepton")
         self.parent_frame_id = rospy.get_param("~parent_frame_id", "world")
 
         self.transforms_dict = {}
@@ -22,7 +23,10 @@ class TransformsNode(object):
                 self.transforms_dict = json.load(transforms_file)
 
     def get_sensor_frame_id(self, sensor_name):
-        return "{}_{}".format(self.name_prefix, sensor_name)
+        if self.combine_sensors:
+            return self.ros_namespace
+        else:
+            return "{}_{}".format(self.ros_namespace, sensor_name)
 
     def publish_transforms(self):
         for sensor_name, transform in self.transforms_dict.items():
