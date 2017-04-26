@@ -1,5 +1,4 @@
 <launch>
-    <arg name="combine_sensors" default="false" doc="if true, single transform frame, otherwise, one per sensor"/>
     <arg name="namespace" default="cepton" doc="prefix for names"/>
     <arg name="parent_frame_id" default="world" doc="parent transform frame"/>
     <arg name="rate" default="10" doc="output rate"/>
@@ -8,9 +7,8 @@
     <!-- start transforms -->
     <arg name="transforms_node_name" value="$(arg namespace)_transforms"/>
     <node pkg="cepton_ros" type="transforms_node.py" name="$(arg transforms_node_name)" output="screen">
-        <param name="combine_sensors" value="$(arg combine_sensors)"/>
         <param name="namespace" value="$(arg namespace)"/>
-        <param name="parent_frame_id" value="$(arg parent_frame)"/>
+        <param name="parent_frame_id" value="$(arg parent_frame_id)"/>
         <param name="rate" value="$(arg rate)"/>
         <param name="file_path" value="$(arg transforms_path)"/>
     </node>

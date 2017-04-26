@@ -1,15 +1,7 @@
 <launch>
-    <arg name="namespace" default="cepton" doc="prefix for names"/>
-    <arg name="parent_frame_id" default="world" doc="parent transform frame"/>
-    <arg name="rviz_config_path" default="$(find cepton_ros)/config/demo_single.rviz" doc="rviz config file path"/>
-
     <!-- Launch driver -->
-    <include file="$(find cepton_ros)/launch/driver_single.launch">
-        <arg name="namespace" value="$(arg namespace)"/>
-        <arg name="parent_frame_id" value="$(arg parent_frame_id)"/>
-    </include>
+    <include file="$(find cepton_ros)/launch/driver_single.launch"/>
 
-    <!-- launch rviz -->
-    <arg name="rviz_node_name" value="$(arg namespace)_rviz"/>
-    <node pkg="rviz" type="rviz" name="$(arg rviz_node_name)" required="true" args="-d $(arg rviz_config_path)"/>
+    <!-- Launch demo -->
+    <include file="$(find cepton_ros)/launch/demo.launch"/>
 </launch>
