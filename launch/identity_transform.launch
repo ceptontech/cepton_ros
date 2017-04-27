@@ -2,5 +2,5 @@
     <arg name="frame_id" doc="transform frame"/>
     <arg name="parent_frame_id" default="world" doc="parent transform frame"/>
 
-    <node pkg="tf" type="static_transform_publisher" name="cepton_transform" args="0 0 0 0 0 0 $(arg parent_frame_id) $(arg frame_id) 100"/>
+    <node pkg="tf" type="static_transform_publisher" name="$(anon cepton_identity_transform)" args="0 0 0 0 0 0 $(arg parent_frame_id) $(arg frame_id) 100"/>
 </launch>

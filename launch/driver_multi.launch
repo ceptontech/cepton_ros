@@ -1,12 +1,13 @@
 <launch>
-    <arg name="namespace" default="cepton" doc="prefix for names"/>
+    <arg name="transforms_path" doc="transforms json file path"/>
+
+    <arg name="output_namespace" default="cepton" doc="prefix for names"/>
     <arg name="output_scanlines" default="false" doc="if true, outputs scanlines, otherwise, output frames"/>
     <arg name="parent_frame_id" default="world" doc="parent_transform frame"/>
-    <arg name="transforms_path" doc="transforms json file path"/>
 
     <!-- Launch driver -->
     <include file="$(find cepton_ros)/launch/driver.launch">
-        <arg name="namespace" value="$(arg namespace)"/>
+        <arg name="output_namespace" value="$(arg output_namespace)"/>
         <arg name="output_scanlines" value="$(arg output_scanlines)"/>
     </include>
 

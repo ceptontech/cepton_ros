@@ -23,20 +23,20 @@ void DriverNodelet::onInit() {
   this->private_node_handle = getPrivateNodeHandle();
 
   // Get parameters
-  private_node_handle.param("namespace", ros_namespace, ros_namespace);
+  private_node_handle.param("output_namespace", output_namespace, output_namespace);
   private_node_handle.param("combine_sensors", combine_sensors,
                             combine_sensors);
   private_node_handle.param("output_scanlines", output_scanlines,
                             output_scanlines);
 
   const std::string sensor_information_topic_id =
-      ros_namespace + "_sensor_information";
+      output_namespace + "_sensor_information";
   sensor_information_publisher =
-      node_handle.advertise<SensorInformation>(sensor_information_topic_id, 10);
+      node_handle.advertise<SensorInformation>(sensor_information_topic_id, 2);
 
   if (combine_sensors) {
     combined_points_publisher = node_handle.advertise<sensor_msgs::PointCloud2>(
-        get_sensor_points_topic_id(""), 10);
+        get_sensor_points_topic_id(""), 2);
   }
 
   // Initialize driver
@@ -62,18 +62,18 @@ void DriverNodelet::onInit() {
 std::string DriverNodelet::get_sensor_points_topic_id(
     const std::string &sensor_name) const {
   if (combine_sensors) {
-    return (ros_namespace + "_points");
+    return (output_namespace + "_points");
   } else {
-    return (ros_namespace + "_points_" + sensor_name);
+    return (output_namespace + "_points_" + sensor_name);
   }
 }
 
 std::string DriverNodelet::get_sensor_frame_id(
     const std::string &sensor_name) const {
   if (combine_sensors) {
-    return ros_namespace;
+    return output_namespace;
   } else {
-    return (ros_namespace + "_" + sensor_name);
+    return (output_namespace + "_" + sensor_name);
   }
 }
 
