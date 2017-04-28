@@ -1,7 +1,7 @@
 <launch>
-    <!-- Launch driver -->
-    <include file="$(find cepton_ros)/launch/driver_single.launch"/>
+  <!-- Launch driver -->
+  <include file="$(find cepton_ros)/launch/driver_single.launch"/>
 
-    <!-- Launch demo -->
-    <include file="$(find cepton_ros)/launch/demo.launch"/>
+  <!-- Launch demo -->
+  <include file="$(find cepton_ros)/launch/demo.launch"/>
 </launch>

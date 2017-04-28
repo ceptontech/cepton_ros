@@ -1,15 +1,15 @@
 <launch>
-    <arg name="output_namespace" default="cepton" doc="prefix for names"/>
-    <arg name="parent_frame_id" default="world" doc="parent transform frame"/>
-    <arg name="rate" default="10" doc="output rate"/>
-    <arg name="transforms_path" doc="transforms file path"/>
+  <arg name="transforms_path" doc="transforms file path"/>
 
-    <!-- start transforms -->
-    <arg name="transforms_node_name" value="$(anon cepton_transforms)"/>
-    <node pkg="cepton_ros" type="transforms_node.py" name="$(arg transforms_node_name)" output="screen">
-        <param name="output_namespace" value="$(arg output_namespace)"/>
-        <param name="parent_frame_id" value="$(arg parent_frame_id)"/>
-        <param name="rate" value="$(arg rate)"/>
-        <param name="file_path" value="$(arg transforms_path)"/>
-    </node>
+  <arg name="output_namespace" default="cepton" doc="prefix for names"/>
+  <arg name="parent_frame_id" default="world" doc="parent transform frame"/>
+  <arg name="rate" default="10" doc="output rate"/>
+
+  <arg name="transforms_node_name" value="$(anon cepton_transforms)"/>
+  <node pkg="cepton_ros" type="transforms_node.py" name="$(arg transforms_node_name)" output="screen">
+    <param name="file_path" value="$(arg transforms_path)"/>
+    <param name="output_namespace" value="$(arg output_namespace)"/>
+    <param name="parent_frame_id" value="$(arg parent_frame_id)"/>
+    <param name="rate" value="$(arg rate)"/>
+  </node>
 </launch>

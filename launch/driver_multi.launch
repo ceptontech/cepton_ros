@@ -1,19 +1,20 @@
 <launch>
-    <arg name="transforms_path" doc="transforms json file path"/>
+  <arg name="transforms_path" doc="transforms json file path"/>
 
-    <arg name="output_namespace" default="cepton" doc="prefix for names"/>
-    <arg name="output_scanlines" default="false" doc="if true, outputs scanlines, otherwise, output frames"/>
-    <arg name="parent_frame_id" default="world" doc="parent_transform frame"/>
+  <arg name="output_namespace" default="cepton" doc="prefix for names"/>
+  <arg name="output_scanlines" default="false" doc="if true, outputs scanlines, otherwise, output frames"/>
+  <arg name="parent_frame_id" default="world" doc="parent_transform frame"/>
 
-    <!-- Launch driver -->
-    <include file="$(find cepton_ros)/launch/driver.launch">
-        <arg name="output_namespace" value="$(arg output_namespace)"/>
-        <arg name="output_scanlines" value="$(arg output_scanlines)"/>
-    </include>
+  <!-- Launch driver -->
+  <include file="$(find cepton_ros)/launch/driver.launch">
+    <arg name="output_namespace" value="$(arg output_namespace)"/>
+    <arg name="output_scanlines" value="$(arg output_scanlines)"/>
+  </include>
 
-    <!-- Launch transform publisher -->
-    <include file="$(find cepton_ros)/launch/transforms.launch">
-        <arg name="parent_frame_id" value="$(arg parent_frame_id)"/>
-        <arg name="transforms_path" value="$(arg transforms_path)"/>
-    </include>
+  <!-- Launch transform publisher -->
+  <include file="$(find cepton_ros)/launch/transforms.launch">
+    <arg name="output_namespace" value="$(arg output_namespace)"/>
+    <arg name="parent_frame_id" value="$(arg parent_frame_id)"/>
+    <arg name="transforms_path" value="$(arg transforms_path)"/>
+  </include>
 </launch>
