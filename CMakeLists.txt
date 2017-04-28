@@ -86,7 +86,7 @@ install(DIRECTORY config/
 )
 
 # Includes
-install(DIRECTORY include/cepton/
+install(DIRECTORY include/cepton_ros/
   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
 )
 
