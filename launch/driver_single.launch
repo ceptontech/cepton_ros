@@ -2,11 +2,13 @@
   <arg name="output_namespace" default="cepton" doc="prefix for names"/>
   <arg name="output_scanlines" default="false" doc="if true, outputs scanlines, otherwise, output frames"/>
   <arg name="parent_frame_id" default="world" doc="parent transform frame"/>
+  <arg name="timestamp_offset" default="0.0" doc="hack to get topics synchronized in rviz"/>
 
   <!-- Launch driver -->
   <include file="$(find cepton_ros)/launch/driver.launch">
     <arg name="combine_sensors" value="true"/>
     <arg name="output_namespace" value="$(arg output_namespace)"/>
     <arg name="output_scanlines" value="$(arg output_scanlines)"/>
+    <arg name="timestamp_offset" value="$(arg timestamp_offset)"/>
   </include>
 </launch>

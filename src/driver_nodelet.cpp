@@ -23,11 +23,18 @@ void DriverNodelet::onInit() {
   this->private_node_handle = getPrivateNodeHandle();
 
   // Get parameters
-  private_node_handle.param("output_namespace", output_namespace, output_namespace);
+
   private_node_handle.param("combine_sensors", combine_sensors,
                             combine_sensors);
+  private_node_handle.param("output_namespace", output_namespace,
+                            output_namespace);
   private_node_handle.param("output_scanlines", output_scanlines,
                             output_scanlines);
+
+  double timestamp_offset_tmp = timestamp_offset.toSec();
+  private_node_handle.param("timestamp_offset", timestamp_offset_tmp,
+                            timestamp_offset_tmp);
+  timestamp_offset = timestamp_offset.fromSec(timestamp_offset_tmp);
 
   const std::string sensor_information_topic_id =
       output_namespace + "_sensor_information";
@@ -122,7 +129,8 @@ void DriverNodelet::on_receive(int error_code, CeptonSensorHandle sensor_handle,
   // Convert to point cloud
   CeptonPointCloud::Ptr point_cloud_ptr(new CeptonPointCloud());
   point_cloud_ptr->reserve(n_points);
-  point_cloud_ptr->header.stamp = pcl_conversions::toPCL(ros::Time::now());
+  point_cloud_ptr->header.stamp =
+      pcl_conversions::toPCL(ros::Time::now() + timestamp_offset);
   point_cloud_ptr->header.frame_id = get_sensor_frame_id(sensor_name);
   point_cloud_ptr->height = 1;
 

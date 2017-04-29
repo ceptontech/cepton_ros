@@ -20,8 +20,9 @@ class DriverNodelet : public nodelet::Nodelet {
   ros::NodeHandle node_handle;
   ros::NodeHandle private_node_handle;
 
-  std::string output_namespace = "cepton";
   bool combine_sensors = false;
+  ros::Duration timestamp_offset{0.0};
+  std::string output_namespace = "cepton";
   bool output_scanlines = true;
 
   ros::Publisher sensor_information_publisher;
