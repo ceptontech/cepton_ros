@@ -1,5 +1,7 @@
 #include "driver_nodelet.hpp"
 
+#include <cstdint>
+
 #include <pluginlib/class_list_macros.h>
 
 PLUGINLIB_EXPORT_CLASS(cepton_ros::DriverNodelet, nodelet::Nodelet);
@@ -127,10 +129,13 @@ void DriverNodelet::on_receive(int error_code, CeptonSensorHandle sensor_handle,
   publish_sensor_information(*sensor_information_ptr);
 
   // Convert to point cloud
+  uint64_t message_timestamp = 0;
+  for (std::size_t i = 0; i < n_points; ++i) {
+    message_timestamp = std::max(message_timestamp, points[i].timestamp);
+  }
   CeptonPointCloud::Ptr point_cloud_ptr(new CeptonPointCloud());
   point_cloud_ptr->reserve(n_points);
-  point_cloud_ptr->header.stamp =
-      pcl_conversions::toPCL(ros::Time::now() + timestamp_offset);
+  point_cloud_ptr->header.stamp = message_timestamp;
   point_cloud_ptr->header.frame_id = get_sensor_frame_id(sensor_name);
   point_cloud_ptr->height = 1;
 
