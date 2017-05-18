@@ -31,6 +31,11 @@ void DriverNodelet::onInit() {
                             combine_sensors);
   private_node_handle.param("output_namespace", output_namespace,
                             output_namespace);
+  private_node_handle.param("output_scanlines", output_scanlines,
+                            output_scanlines);
+
+  private_node_handle.param("use_sensor_time", use_sensor_time,
+                            use_sensor_time);
 
   const std::string sensor_information_topic_id =
       output_namespace + "_sensor_information";
@@ -45,35 +50,27 @@ void DriverNodelet::onInit() {
   int error_code;
 
   // Initialize driver
-  auto on_receive_callback =
-      [this](int error_code, CeptonSensorHandle sensor_handle,
-             std::size_t n_points, CeptonSensorPoint const *points) {
-        return on_receive(error_code, sensor_handle, n_points, points);
-      };
-  auto on_event_callback =
+  auto &driver = cepton_ros::Driver::get_instance();
+  driver.set_event_callback(
       [this](int error_code, CeptonSensorHandle sensor_handle,
              CeptonSensorInformation const *sensor_information_ptr,
              int sensor_event) {
-        return on_event(error_code, sensor_handle, sensor_information_ptr,
-                        sensor_event);
-      };
-  auto &driver = cepton_ros::Driver::get_instance();
-  if (!driver.initialize(on_receive_callback, on_event_callback)) {
-    return;
-  }
-
-  // Start capture replay
-  if (!capture_path.empty()) {
-    error_code = cepton_sdk_capture_replay_open(capture_path.c_str());
-    if (error_code != CEPTON_SUCCESS) {
-      NODELET_FATAL("opening capture replay failed: %s!", error_code);
-      return;
-    }
-    error_code = cepton_sdk_capture_replay_resume();
-    if (error_code != CEPTON_SUCCESS) {
-      NODELET_FATAL("resuming capture replay failed: %s!", error_code);
-      return;
-    }
+        event_callback(error_code, sensor_handle, sensor_information_ptr,
+                       sensor_event);
+      });
+  driver.set_image_points_callback(
+      [this](int error_code, CeptonSensorHandle sensor_handle,
+             std::size_t n_points, CeptonSensorImagePoint const *image_points) {
+        image_points_callback(error_code, sensor_handle, n_points,
+                              image_points);
+      });
+  driver.set_points_callback(
+      [this](int error_code, CeptonSensorHandle sensor_handle,
+             std::size_t n_points, CeptonSensorPoint const *points) {
+        points_callback(error_code, sensor_handle, n_points, points);
+      });
+  if (!driver.initialize(output_scanlines)) {
+    NODELET_FATAL("driver initialization failed");
   }
 }
 
@@ -119,11 +116,44 @@ void DriverNodelet::publish_sensor_information(
   sensor_information_publisher.publish(msg);
 }
 
-void DriverNodelet::on_receive(int error_code, CeptonSensorHandle sensor_handle,
-                               std::size_t n_points,
-                               CeptonSensorPoint const *points) {
+void DriverNodelet::event_callback(
+    int error_code, CeptonSensorHandle sensor_handle,
+    CeptonSensorInformation const *sensor_information_ptr, int sensor_event) {
   if (error_code < 0) {
-    NODELET_WARN("on_receive failed: %i", error_code);
+    NODELET_WARN("event callback failed: [error code %i]", error_code);
+    return;
+  }
+
+  std::string sensor_name = get_sensor_name(*sensor_information_ptr);
+
+  switch (sensor_event) {
+    case CEPTON_EVENT_ATTACH:
+      NODELET_INFO("sensor connected: %s", sensor_name.c_str());
+      break;
+    case CEPTON_EVENT_DETACH:
+      NODELET_INFO("sensor disconnected: %s", sensor_name.c_str());
+      break;
+    case CEPTON_EVENT_FRAME:
+      break;
+  }
+}
+
+void DriverNodelet::image_points_callback(
+    int error_code, CeptonSensorHandle sensor_handle, std::size_t n_points,
+    CeptonSensorImagePoint const *image_points) {
+  if (error_code < 0) {
+    NODELET_WARN("image points callback failed: [error code %i]", error_code);
+  }
+
+  // TODO
+}
+
+void DriverNodelet::points_callback(int error_code,
+                                    CeptonSensorHandle sensor_handle,
+                                    std::size_t n_points,
+                                    CeptonSensorPoint const *points) {
+  if (error_code < 0) {
+    NODELET_WARN("points callback failed: [error code %i]", error_code);
   }
 
   CeptonSensorInformation const *sensor_information_ptr =
@@ -132,10 +162,16 @@ void DriverNodelet::on_receive(int error_code, CeptonSensorHandle sensor_handle,
   publish_sensor_information(*sensor_information_ptr);
 
   // Convert to point cloud
-  uint64_t message_timestamp = 0;
-  for (std::size_t i = 0; i < n_points; ++i) {
-    message_timestamp = std::max(message_timestamp, points[i].timestamp);
+  uint64_t message_timestamp;
+  if (use_sensor_time) {
+    message_timestamp = 0;
+    for (std::size_t i = 0; i < n_points; ++i) {
+      message_timestamp = std::max(message_timestamp, points[i].timestamp);
+    }
+  } else {
+    message_timestamp = ros::Time::now().toSec() * 1e6;
   }
+
   CeptonPointCloud::Ptr point_cloud_ptr(new CeptonPointCloud());
   point_cloud_ptr->reserve(n_points);
   point_cloud_ptr->header.stamp = message_timestamp;
@@ -157,25 +193,4 @@ void DriverNodelet::on_receive(int error_code, CeptonSensorHandle sensor_handle,
   get_sensor_points_publisher(sensor_name).publish(point_cloud_ptr);
 }
 
-void DriverNodelet::on_event(
-    int error_code, CeptonSensorHandle sensor_handle,
-    CeptonSensorInformation const *sensor_information_ptr, int sensor_event) {
-  if (error_code < 0) {
-    NODELET_WARN("on_event failed: %i", error_code);
-    return;
-  }
-
-  std::string sensor_name = get_sensor_name(*sensor_information_ptr);
-
-  switch (sensor_event) {
-    case CEPTON_EVENT_ATTACH:
-      NODELET_INFO("sensor connected: %s", sensor_name.c_str());
-      break;
-    case CEPTON_EVENT_DETACH:
-      NODELET_INFO("sensor disconnected: %s", sensor_name.c_str());
-      break;
-    case CEPTON_EVENT_FRAME:
-      break;
-  }
-}
 }  // namespace cepton_ros

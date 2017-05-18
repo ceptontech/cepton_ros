@@ -11,10 +11,12 @@ namespace cepton_ros {
 
 class Driver {
  public:
-  using OnReceiveCallback = std::function<void(
-      int, CeptonSensorHandle, std::size_t, CeptonSensorPoint const *)>;
-  using OnEventCallback = std::function<void(
+  using EventCallback = std::function<void(
       int, CeptonSensorHandle, CeptonSensorInformation const *, int)>;
+  using ImagePointsCallback = std::function<void(
+      int, CeptonSensorHandle, std::size_t, CeptonSensorImagePoint const *)>;
+  using PointsCallback = std::function<void(
+      int, CeptonSensorHandle, std::size_t, CeptonSensorPoint const *)>;
 
  private:
   std::shared_ptr<Driver> instance_ptr;
@@ -22,8 +24,9 @@ class Driver {
   std::atomic<bool> initialized{false};
   std::mutex internal_mutex;
 
-  OnReceiveCallback on_receive_callback;
-  OnEventCallback on_event_callback;
+  EventCallback event_callback;
+  ImagePointsCallback image_points_callback;
+  PointsCallback points_callback;
 
  public:
   Driver() = default;
@@ -33,16 +36,22 @@ class Driver {
 
   static Driver &get_instance();
 
-  bool initialize(OnReceiveCallback on_receive_callback,
-                  OnEventCallback on_event_callback);
+  void set_event_callback(const EventCallback &callback);
+  void set_image_points_callback(
+      const ImagePointsCallback &callback);
+  void set_points_callback(const PointsCallback &callback);
+  bool initialize(bool listen_frames);
   void deinitialize();
 
-  friend void driver_on_receive(int error_code,
-                                CeptonSensorHandle sensor_handle,
-                                std::size_t n_points,
-                                CeptonSensorPoint const *points);
-  friend void driver_on_event(
+  friend void driver_event_callback(
       int error_code, CeptonSensorHandle sensor_handle,
       CeptonSensorInformation const *sensor_information_ptr, int sensor_event);
+  friend void driver_points_callback(int error_code,
+                                     CeptonSensorHandle sensor_handle,
+                                     std::size_t n_points,
+                                     CeptonSensorPoint const *points);
+  friend void driver_image_points_callback(
+      int error_code, CeptonSensorHandle sensor_handle, std::size_t n_points,
+      CeptonSensorImagePoint const *image_points);
 };
 }  // namespace cepton_ros

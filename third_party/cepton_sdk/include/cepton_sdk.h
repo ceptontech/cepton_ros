@@ -160,6 +160,27 @@ DLL_EXPORT int cepton_sdk_listen_image_scanlines(
 DLL_EXPORT int cepton_sdk_unlisten_image_scanlines(
     FpCeptonSensorImageDataCallback cb);
 
+
+
+struct CeptonSensorImagePoint {
+  uint64_t timestamp; // Microseconds from start of epoch
+  float image_x; // x-offset on a unit image plane
+  float distance; // Distance in meters
+  float image_z; // z-offset on a unit image plane
+  float intensity; // 0-1 scaled intensity
+};
+
+typedef void(*FpCeptonSensorImageDataCallback)(int error_code, CeptonSensorHandle sensor,
+  size_t n_points, struct CeptonSensorImagePoint const *p_points);
+
+// Register callbacks that will be called once per "frame"
+int cepton_sdk_listen_image_frames(FpCeptonSensorImageDataCallback cb);
+int cepton_sdk_unlisten_image_frames(FpCeptonSensorImageDataCallback cb);
+
+// Register calbacks that will be called once per "scan-line"
+int cepton_sdk_listen_image_scanlines(FpCeptonSensorImageDataCallback cb);
+int cepton_sdk_unlisten_image_scanlines(FpCeptonSensorImageDataCallback cb);
+
 //--------------------------------------------
 // Discover connected sensors
 DLL_EXPORT int cepton_sdk_get_number_of_sensors();
@@ -186,38 +207,13 @@ DLL_EXPORT int cepton_sdk_get_transform(
 
 //--------------------------------------------
 // Mock Sensor replay and capture
-DLL_EXPORT void cepton_sdk_mock_network_receive(uint64_t ipv4_address,
-                                                uint8_t const *mac,
-                                                uint8_t const *buffer,
-                                                size_t size);
+void cepton_sdk_mock_network_receive(uint64_t ipv4_address, uint8_t const *mac,
+  uint8_t const *buffer, size_t size);
 
-typedef void (*FpCeptonNetworkReceiveCb)(int error_code, uint64_t ipv4_address,
-                                         uint8_t const *mac,
-                                         uint8_t const *buffer, size_t size);
-DLL_EXPORT int cepton_sdk_listen_network_packet(FpCeptonNetworkReceiveCb cb);
-DLL_EXPORT int cepton_sdk_unlisten_network_packet(FpCeptonNetworkReceiveCb cb);
-
-// Network capture replay
-DLL_EXPORT int cepton_sdk_capture_replay_is_open(int * is_open_ptr);
-DLL_EXPORT int cepton_sdk_capture_replay_open(char const * const path);
-DLL_EXPORT int cepton_sdk_capture_replay_close();
-
-DLL_EXPORT int cepton_sdk_capture_replay_get_position(float * sec_ptr);
-
-// Replay must be paused before seeking.
-DLL_EXPORT int cepton_sdk_capture_replay_seek(float sec);
-DLL_EXPORT int cepton_sdk_capture_replay_seek_relative(float sec);
-
-// Replay capture data in current thread.
-// No sleep between packets.
-DLL_EXPORT int cepton_sdk_capture_replay_resume_blocking_once();
-DLL_EXPORT int cepton_sdk_capture_replay_resume_blocking(float sec);
-
-// Replay capture data in a separate thread.
-// Sleep between packets to simulate realtime data.
-DLL_EXPORT int cepton_sdk_capture_replay_is_running(int * is_running_ptr);
-DLL_EXPORT int cepton_sdk_capture_replay_resume();
-DLL_EXPORT int cepton_sdk_capture_replay_pause();
+typedef void(*FpCeptonNetworkReceiveCb)(int error_code, uint64_t ipv4_address, uint8_t const *mac,
+  uint8_t const *buffer, size_t size);
+int cepton_sdk_listen_network_packet(FpCeptonNetworkReceiveCb cb);
+int cepton_sdk_unlisten_network_packet(FpCeptonNetworkReceiveCb cb);
 
 #ifdef __cplusplus
 }  // extern "C"

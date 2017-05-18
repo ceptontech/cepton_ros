@@ -21,8 +21,9 @@ class DriverNodelet : public nodelet::Nodelet {
   ros::NodeHandle private_node_handle;
 
   bool combine_sensors = false;
-  ros::Duration timestamp_offset{0.0};
   std::string output_namespace = "cepton";
+  bool output_scanlines = false;
+  bool use_sensor_time = false;
 
   ros::Publisher sensor_information_publisher;
   ros::Publisher combined_points_publisher;
@@ -31,11 +32,14 @@ class DriverNodelet : public nodelet::Nodelet {
  public:
   ~DriverNodelet();
 
-  void on_receive(int error_code, CeptonSensorHandle sensor_handle,
-                  std::size_t n_points, CeptonSensorPoint const *points);
-  void on_event(int error_code, CeptonSensorHandle sensor_handle,
-                CeptonSensorInformation const *sensor_information_ptr,
-                int sensor_event);
+  void event_callback(int error_code, CeptonSensorHandle sensor_handle,
+                      CeptonSensorInformation const *sensor_information_ptr,
+                      int sensor_event);
+  void image_points_callback(int error_code, CeptonSensorHandle sensor_handle,
+                             std::size_t n_points,
+                             CeptonSensorImagePoint const *image_points);
+  void points_callback(int error_code, CeptonSensorHandle sensor_handle,
+                       std::size_t n_points, CeptonSensorPoint const *points);
 
  protected:
   void onInit() override;
