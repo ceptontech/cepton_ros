@@ -1,8 +1,7 @@
 <launch>
+  <arg name="capture_path" default="" doc="capture replay file path"/>
   <arg name="combine_sensors" default="false" doc="if true, single topic and transform frame, otherwise one per sensor"/>
   <arg name="output_namespace" default="cepton" doc="prefix for names"/>
-  <arg name="output_scanlines" default="false" doc="if true, outputs scanlines, otherwise, output frames"/>
-  <arg name="timestamp_offset" default="0.0" doc="hack to get topics synchronized in rviz"/>
 
   <!-- launch nodelet manager -->
   <arg name="manager_node_name" value="$(anon cepton_manager)"/>
@@ -11,9 +10,8 @@
   <!-- launch driver -->
   <arg name="driver_node_name" value="$(anon cepton_driver)"/>
   <node pkg="nodelet" type="nodelet" name="$(arg driver_node_name)" args="load cepton_ros/DriverNodelet $(arg manager_node_name)" output="screen">
+    <param name="capture_path" value="$(arg capture_path)"/>
     <param name="combine_sensors" value="$(arg combine_sensors)"/>
     <param name="output_namespace" value="$(arg output_namespace)"/>
-    <param name="output_scanlines" value="$(arg output_scanlines)"/>
-    <param name="timestamp_offset" value="$(arg timestamp_offset)"/>
   </node>
 </launch>

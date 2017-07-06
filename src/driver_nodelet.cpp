@@ -25,18 +25,12 @@ void DriverNodelet::onInit() {
   this->private_node_handle = getPrivateNodeHandle();
 
   // Get parameters
-
+  std::string capture_path = "";
+  private_node_handle.param("capture_path", capture_path, capture_path);
   private_node_handle.param("combine_sensors", combine_sensors,
                             combine_sensors);
   private_node_handle.param("output_namespace", output_namespace,
                             output_namespace);
-  private_node_handle.param("output_scanlines", output_scanlines,
-                            output_scanlines);
-
-  double timestamp_offset_tmp = timestamp_offset.toSec();
-  private_node_handle.param("timestamp_offset", timestamp_offset_tmp,
-                            timestamp_offset_tmp);
-  timestamp_offset = timestamp_offset.fromSec(timestamp_offset_tmp);
 
   const std::string sensor_information_topic_id =
       output_namespace + "_sensor_information";
@@ -47,6 +41,8 @@ void DriverNodelet::onInit() {
     combined_points_publisher = node_handle.advertise<sensor_msgs::PointCloud2>(
         get_sensor_points_topic_id(""), 2);
   }
+
+  int error_code;
 
   // Initialize driver
   auto on_receive_callback =
@@ -62,9 +58,22 @@ void DriverNodelet::onInit() {
                         sensor_event);
       };
   auto &driver = cepton_ros::Driver::get_instance();
-  if (!driver.initialize(on_receive_callback, on_event_callback,
-                         output_scanlines)) {
-    NODELET_FATAL("driver initialization failed");
+  if (!driver.initialize(on_receive_callback, on_event_callback)) {
+    return;
+  }
+
+  // Start capture replay
+  if (!capture_path.empty()) {
+    error_code = cepton_sdk_capture_replay_open(capture_path.c_str());
+    if (error_code != CEPTON_SUCCESS) {
+      NODELET_FATAL("opening capture replay failed: %s!", error_code);
+      return;
+    }
+    error_code = cepton_sdk_capture_replay_resume();
+    if (error_code != CEPTON_SUCCESS) {
+      NODELET_FATAL("resuming capture replay failed: %s!", error_code);
+      return;
+    }
   }
 }
 
@@ -98,12 +107,6 @@ ros::Publisher &DriverNodelet::get_sensor_points_publisher(
     }
     return sensor_points_publishers.at(sensor_name);
   }
-}
-
-bool DriverNodelet::is_point_valid(const CeptonSensorPoint &point) const {
-  double distance =
-      std::sqrt(point.x * point.x + point.y * point.y + point.z * point.z);
-  return distance > 5.0;
 }
 
 void DriverNodelet::publish_sensor_information(
@@ -141,9 +144,6 @@ void DriverNodelet::on_receive(int error_code, CeptonSensorHandle sensor_handle,
 
   for (std::size_t i_point = 0; i_point < n_points; ++i_point) {
     const CeptonSensorPoint &cepton_point = points[i_point];
-    if (!is_point_valid(cepton_point)) {
-      continue;
-    }
     CeptonPoint pcl_point;
     pcl_point.timestamp = cepton_point.timestamp;
     pcl_point.x = cepton_point.x;

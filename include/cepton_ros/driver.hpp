@@ -34,7 +34,7 @@ class Driver {
   static Driver &get_instance();
 
   bool initialize(OnReceiveCallback on_receive_callback,
-                  OnEventCallback on_event_callback, bool listen_frames);
+                  OnEventCallback on_event_callback);
   void deinitialize();
 
   friend void driver_on_receive(int error_code,

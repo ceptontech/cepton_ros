@@ -23,7 +23,6 @@ class DriverNodelet : public nodelet::Nodelet {
   bool combine_sensors = false;
   ros::Duration timestamp_offset{0.0};
   std::string output_namespace = "cepton";
-  bool output_scanlines = true;
 
   ros::Publisher sensor_information_publisher;
   ros::Publisher combined_points_publisher;
@@ -45,8 +44,6 @@ class DriverNodelet : public nodelet::Nodelet {
   std::string get_sensor_points_topic_id(const std::string &sensor_name) const;
   std::string get_sensor_frame_id(const std::string &sensor_name) const;
   ros::Publisher &get_sensor_points_publisher(const std::string &sensor_name);
-
-  bool is_point_valid(const CeptonSensorPoint &point) const;
 
   void publish_sensor_information(
       const CeptonSensorInformation &sensor_information);

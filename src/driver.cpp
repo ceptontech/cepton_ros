@@ -35,8 +35,7 @@ Driver &Driver::get_instance() {
 }
 
 bool Driver::initialize(OnReceiveCallback on_receive_callback,
-                        OnEventCallback on_event_callback,
-                        bool listen_scanlines) {
+                        OnEventCallback on_event_callback) {
   std::lock_guard<std::mutex> lock(internal_mutex);
 
   if (initialized) {
@@ -51,17 +50,13 @@ bool Driver::initialize(OnReceiveCallback on_receive_callback,
 
   error_code = cepton_sdk_initialize(CEPTON_SDK_VERSION, 0, driver_on_event);
   if (error_code < 0) {
-    ROS_WARN("cepton_sdk_initialize failed [error code %i]", error_code);
+    ROS_FATAL("cepton_sdk_initialize failed [error code %i]", error_code);
     return false;
   }
 
-  if (listen_scanlines) {
-    error_code = cepton_sdk_listen_scanlines(driver_on_receive);
-  } else {
-    error_code = cepton_sdk_listen_frames(driver_on_receive);
-  }
+  error_code = cepton_sdk_listen_frames(driver_on_receive);
   if (error_code < 0) {
-    ROS_WARN("cepton_sdk_listen_frames failed [error code %i]", error_code);
+    ROS_FATAL("cepton_sdk_listen_frames failed [error code %i]", error_code);
     return false;
   }
 

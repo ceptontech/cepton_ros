@@ -1,6 +1,10 @@
 <launch>
+  <arg name="capture_path" default="" doc="capture replay file path"/>
+
   <!-- Launch driver -->
-  <include file="$(find cepton_ros)/launch/driver_single.launch"/>
+  <include file="$(find cepton_ros)/launch/driver_single.launch">
+    <arg name="capture_path" value="$(arg capture_path)"/>
+  </include>
 
   <!-- Launch demo -->
   <include file="$(find cepton_ros)/launch/demo.launch"/>
