@@ -2,6 +2,7 @@
   <arg name="capture_path" default="" doc="capture replay file path"/>
   <arg name="transforms_path" doc="transforms json file path"/>
 
+  <arg name="capture_path" default="" doc="capture file path"/>
   <arg name="output_namespace" default="cepton" doc="prefix for names"/>
   <arg name="parent_frame_id" default="world" doc="parent_transform frame"/>
 
@@ -9,6 +10,7 @@
   <include file="$(find cepton_ros)/launch/driver.launch">
     <arg name="capture_path" value="$(arg capture_path)"/>
     <arg name="output_namespace" value="$(arg output_namespace)"/>
+    <arg name="output_scanlines" value="$(arg output_scanlines)"/>
   </include>
 
   <!-- Launch transform publisher -->

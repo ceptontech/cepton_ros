@@ -20,6 +20,7 @@ class DriverNodelet : public nodelet::Nodelet {
   ros::NodeHandle node_handle;
   ros::NodeHandle private_node_handle;
 
+  std::string capture_path;
   bool combine_sensors = false;
   std::string output_namespace = "cepton";
   bool output_scanlines = false;

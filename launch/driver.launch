@@ -1,5 +1,5 @@
 <launch>
-  <arg name="capture_path" default="" doc="capture replay file path"/>
+  <arg name="capture_path" default="" doc="capture file path"/>
   <arg name="combine_sensors" default="false" doc="if true, single topic and transform frame, otherwise one per sensor"/>
   <arg name="output_namespace" default="cepton" doc="prefix for names"/>
   <arg name="output_scanlines" default="false" doc="if true, outputs scanlines, otherwise, output frames"/>

@@ -25,7 +25,6 @@ void DriverNodelet::onInit() {
   this->private_node_handle = getPrivateNodeHandle();
 
   // Get parameters
-  std::string capture_path = "";
   private_node_handle.param("capture_path", capture_path, capture_path);
   private_node_handle.param("combine_sensors", combine_sensors,
                             combine_sensors);
@@ -50,6 +49,7 @@ void DriverNodelet::onInit() {
   int error_code;
 
   // Initialize driver
+  int error_code;
   auto &driver = cepton_ros::Driver::get_instance();
   driver.set_event_callback(
       [this](int error_code, CeptonSensorHandle sensor_handle,
@@ -71,6 +71,12 @@ void DriverNodelet::onInit() {
       });
   if (!driver.initialize(output_scanlines)) {
     NODELET_FATAL("driver initialization failed");
+  }
+
+  // Start capture
+  if (!capture_path.empty()) {
+    error_code = cepton_sdk_capture_replay_open(capture_path.c_str());
+    error_code = cepton_sdk_capture_replay_resume();
   }
 }
 
