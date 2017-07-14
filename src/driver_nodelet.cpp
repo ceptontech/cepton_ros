@@ -76,7 +76,7 @@ void DriverNodelet::onInit() {
   // Start capture
   if (!capture_path.empty()) {
     error_code = cepton_sdk_capture_replay_open(capture_path.c_str());
-    error_code = cepton_sdk_capture_replay_resume();
+    error_code = cepton_sdk_capture_replay_resume(true);
   }
 }
 

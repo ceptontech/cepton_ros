@@ -24,7 +24,7 @@ include_directories(SYSTEM ${catkin_INCLUDE_DIRS})
 # Cepton SDK
 set(CEPTON_SDK_DIR "${PROJECT_SOURCE_DIR}/third_party/cepton_sdk")
 include_directories(SYSTEM "${CEPTON_SDK_DIR}/include")
-set(CEPTON_SDK_LIBRARIES "${CEPTON_SDK_DIR}/lib/libcepton_sdk_static.a")
+set(CEPTON_SDK_LIBRARIES "${CEPTON_SDK_DIR}/lib/libcepton_sdk.a")
 
 set(CEPTON_ROS_EXTERNAL_LIBRARIES
   ${CEPTON_SDK_LIBRARIES})
