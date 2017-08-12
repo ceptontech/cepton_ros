@@ -40,7 +40,7 @@ class Driver {
   void set_image_points_callback(
       const ImagePointsCallback &callback);
   void set_points_callback(const PointsCallback &callback);
-  bool initialize(bool listen_frames);
+  bool initialize();
   void deinitialize();
 
   friend void driver_event_callback(

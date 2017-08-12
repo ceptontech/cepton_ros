@@ -30,8 +30,6 @@ void DriverNodelet::onInit() {
                             combine_sensors);
   private_node_handle.param("output_namespace", output_namespace,
                             output_namespace);
-  private_node_handle.param("output_scanlines", output_scanlines,
-                            output_scanlines);
 
   private_node_handle.param("use_sensor_time", use_sensor_time,
                             use_sensor_time);
@@ -69,7 +67,7 @@ void DriverNodelet::onInit() {
              std::size_t n_points, CeptonSensorPoint const *points) {
         points_callback(error_code, sensor_handle, n_points, points);
       });
-  if (!driver.initialize(output_scanlines)) {
+  if (!driver.initialize()) {
     NODELET_FATAL("driver initialization failed");
   }
 

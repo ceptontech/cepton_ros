@@ -66,7 +66,7 @@ void Driver::set_points_callback(const PointsCallback &callback) {
   this->points_callback = callback;
 }
 
-bool Driver::initialize(bool listen_scanlines) {
+bool Driver::initialize() {
   std::lock_guard<std::mutex> lock(internal_mutex);
 
   if (initialized) {
@@ -84,38 +84,19 @@ bool Driver::initialize(bool listen_scanlines) {
   }
 
   // Listen
-  if (listen_scanlines) {
-    // Image points
-    error_code =
-        cepton_sdk_listen_image_scanlines(driver_image_points_callback);
-    if (error_code < 0) {
-      ROS_WARN("cepton_sdk_listen_image_scanlines failed [error code %i]",
-               error_code);
-      return false;
-    }
+  // Image points
+  error_code = cepton_sdk_listen_image_frames(driver_image_points_callback);
+  if (error_code < 0) {
+    ROS_WARN("cepton_sdk_listen_image_frames failed [error code %i]",
+             error_code);
+    return false;
+  }
 
-    // Points
-    error_code = cepton_sdk_listen_scanlines(driver_points_callback);
-    if (error_code < 0) {
-      ROS_WARN("cepton_sdk_listen_scanlines failed [error code %i]",
-               error_code);
-      return false;
-    }
-  } else {
-    // Image points
-    error_code = cepton_sdk_listen_image_frames(driver_image_points_callback);
-    if (error_code < 0) {
-      ROS_WARN("cepton_sdk_listen_image_frames failed [error code %i]",
-               error_code);
-      return false;
-    }
-
-    // Points
-    error_code = cepton_sdk_listen_frames(driver_points_callback);
-    if (error_code < 0) {
-      ROS_WARN("cepton_sdk_listen_frames failed [error code %i]", error_code);
-      return false;
-    }
+  // Points
+  error_code = cepton_sdk_listen_frames(driver_points_callback);
+  if (error_code < 0) {
+    ROS_WARN("cepton_sdk_listen_frames failed [error code %i]", error_code);
+    return false;
   }
 
   initialized.store(true);

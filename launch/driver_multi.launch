@@ -10,7 +10,6 @@
   <include file="$(find cepton_ros)/launch/driver.launch">
     <arg name="capture_path" value="$(arg capture_path)"/>
     <arg name="output_namespace" value="$(arg output_namespace)"/>
-    <arg name="output_scanlines" value="$(arg output_scanlines)"/>
   </include>
 
   <!-- Launch transform publisher -->

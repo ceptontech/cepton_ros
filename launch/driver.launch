@@ -2,7 +2,6 @@
   <arg name="capture_path" default="" doc="capture file path"/>
   <arg name="combine_sensors" default="false" doc="if true, single topic and transform frame, otherwise one per sensor"/>
   <arg name="output_namespace" default="cepton" doc="prefix for names"/>
-  <arg name="output_scanlines" default="false" doc="if true, outputs scanlines, otherwise, output frames"/>
   <arg name="use_sensor_time" default="false" doc="if true, message timestamps are sensor time, otherwise, they are ros time"/>
 
   <!-- launch nodelet manager -->
@@ -15,7 +14,6 @@
     <param name="capture_path" value="$(arg capture_path)"/>
     <param name="combine_sensors" value="$(arg combine_sensors)"/>
     <param name="output_namespace" value="$(arg output_namespace)"/>
-    <param name="output_scanlines" value="$(arg output_scanlines)"/>
     <param name="use_sensor_time" value="$(arg use_sensor_time)"/>
   </node>
 </launch>
