@@ -44,10 +44,7 @@ void DriverNodelet::onInit() {
         get_sensor_points_topic_id(""), 2);
   }
 
-  int error_code;
-
   // Initialize driver
-  int error_code;
   auto &driver = cepton_ros::Driver::get_instance();
   driver.set_event_callback(
       [this](int error_code, CeptonSensorHandle sensor_handle,
@@ -73,6 +70,7 @@ void DriverNodelet::onInit() {
 
   // Start capture
   if (!capture_path.empty()) {
+    int error_code;
     error_code = cepton_sdk_capture_replay_open(capture_path.c_str());
     error_code = cepton_sdk_capture_replay_resume(true);
   }
