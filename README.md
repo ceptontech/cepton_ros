@@ -32,4 +32,4 @@ Connect the sensor's ethernet cable to the computer (we recommend using a USB to
 
 The best place to start, is to launch the demo (`roscore` must be running already)
 
-    $ roslaunch cepton demo_single.launch
+    $ roslaunch cepton_ros demo_single.launch
