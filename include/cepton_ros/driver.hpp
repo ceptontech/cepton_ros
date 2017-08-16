@@ -37,10 +37,9 @@ class Driver {
   static Driver &get_instance();
 
   void set_event_callback(const EventCallback &callback);
-  void set_image_points_callback(
-      const ImagePointsCallback &callback);
+  void set_image_points_callback(const ImagePointsCallback &callback);
   void set_points_callback(const PointsCallback &callback);
-  bool initialize();
+  bool initialize(int control_flags = 0);
   void deinitialize();
 
   friend void driver_event_callback(

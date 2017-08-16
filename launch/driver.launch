@@ -1,6 +1,7 @@
 <launch>
   <arg name="capture_path" default="" doc="capture file path"/>
   <arg name="combine_sensors" default="false" doc="if true, single topic and transform frame, otherwise one per sensor"/>
+  <arg name="control_flags" default="0" doc="sdk control flags"/>
   <arg name="output_namespace" default="cepton" doc="prefix for names"/>
   <arg name="use_sensor_time" default="false" doc="if true, message timestamps are sensor time, otherwise, they are ros time"/>
 
@@ -13,6 +14,7 @@
   <node pkg="nodelet" type="nodelet" name="$(arg driver_node_name)" args="load cepton_ros/DriverNodelet $(arg manager_node_name)" output="screen">
     <param name="capture_path" value="$(arg capture_path)"/>
     <param name="combine_sensors" value="$(arg combine_sensors)"/>
+    <param name="control_flags" value="$(arg control_flags)"/>
     <param name="output_namespace" value="$(arg output_namespace)"/>
     <param name="use_sensor_time" value="$(arg use_sensor_time)"/>
   </node>

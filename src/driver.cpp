@@ -66,7 +66,7 @@ void Driver::set_points_callback(const PointsCallback &callback) {
   this->points_callback = callback;
 }
 
-bool Driver::initialize() {
+bool Driver::initialize(int control_flags) {
   std::lock_guard<std::mutex> lock(internal_mutex);
 
   if (initialized) {
@@ -76,8 +76,8 @@ bool Driver::initialize() {
   int error_code;
 
   // Initialize sdk
-  error_code =
-      cepton_sdk_initialize(CEPTON_SDK_VERSION, 0, driver_event_callback);
+  error_code = cepton_sdk_initialize(CEPTON_SDK_VERSION, control_flags,
+                                     driver_event_callback);
   if (error_code < 0) {
     ROS_FATAL("cepton_sdk_initialize failed [error code %i]", error_code);
     return false;

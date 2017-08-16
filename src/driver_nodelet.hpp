@@ -20,13 +20,14 @@ class DriverNodelet : public nodelet::Nodelet {
   ros::NodeHandle node_handle;
   ros::NodeHandle private_node_handle;
 
-  std::string capture_path;
   bool combine_sensors = false;
   std::string output_namespace = "cepton";
   bool use_sensor_time = false;
 
   ros::Publisher sensor_information_publisher;
+  ros::Publisher combined_image_points_publisher;
   ros::Publisher combined_points_publisher;
+  std::map<std::string, ros::Publisher> sensor_image_points_publishers;
   std::map<std::string, ros::Publisher> sensor_points_publishers;
 
  public:
@@ -38,18 +39,31 @@ class DriverNodelet : public nodelet::Nodelet {
   void image_points_callback(int error_code, CeptonSensorHandle sensor_handle,
                              std::size_t n_points,
                              CeptonSensorImagePoint const *image_points);
-  void points_callback(int error_code, CeptonSensorHandle sensor_handle,
-                       std::size_t n_points, CeptonSensorPoint const *points);
 
  protected:
   void onInit() override;
 
  private:
+  std::string get_sensor_image_points_topic_id(
+      const std::string &sensor_name) const;
   std::string get_sensor_points_topic_id(const std::string &sensor_name) const;
   std::string get_sensor_frame_id(const std::string &sensor_name) const;
+  ros::Publisher &get_sensor_image_points_publisher(
+      const std::string &sensor_name);
   ros::Publisher &get_sensor_points_publisher(const std::string &sensor_name);
 
+  void convert_image_to_points(const CeptonSensorImagePoint &image_point,
+                               CeptonSensorPoint &point);
   void publish_sensor_information(
       const CeptonSensorInformation &sensor_information);
+
+  void publish_image_points(const std::string &sensor_name,
+                            uint64_t message_timestamp, std::size_t n_points,
+                            CeptonSensorImagePoint const *image_points);
+  void publish_points(const std::string &sensor_name,
+                      uint64_t message_timestamp, std::size_t n_points,
+                      CeptonSensorPoint const *points);
+
+  std::vector<CeptonSensorPoint> points;
 };
 }  // namespace cepton_ros
