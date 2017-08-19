@@ -1,5 +1,4 @@
 <launch>
-  <arg name="capture_path" default="" doc="capture replay file path"/>
   <arg name="transforms_path" doc="transforms json file path"/>
 
   <arg name="capture_path" default="" doc="capture file path"/>

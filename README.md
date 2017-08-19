@@ -33,3 +33,17 @@ Connect the sensor's ethernet cable to the computer (we recommend using a USB to
 The best place to start, is to launch the demo (`roscore` must be running already)
 
     $ roslaunch cepton_ros demo_single.launch
+
+## Using multiple sensors
+
+Multiple sensors can be used with the `driver_multi.launch` file. The driver will publish separate topics and transforms for each sensor.
+
+    $ roslaunch cepton_ros driver_multi.launch transforms_path:=<transforms_file>
+
+A sample transforms file can be found at `samples/cepton_transforms.json`. The rotation is in quaternion format `<x, y, z, w>`. The coordinate system is as follows: `+x` = right, `+y` = forward, `+z` = up.
+
+## Troubleshooting
+
+First, try using the sensor with `CeptonViewer` (https://github.com/ceptontech/cepton_sdk_redist).
+
+If no points are seen when running `demo_single.launch`, the most likely cause is a network issue. Using Wireshark, or another networking tool, check that you are receiving packets on port 8808. If you not, check your networking settings.
