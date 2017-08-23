@@ -1,7 +1,7 @@
 //
 // Copyright Cepton Technologies Inc. 2017, All rights reserved.
 //
-// Cepton Sensor SDK v0.6d (Beta)
+// Cepton Sensor SDK v0.7a (Beta)
 //
 #pragma once
 
@@ -186,28 +186,12 @@ DLL_EXPORT int cepton_sdk_unlisten_image_scanlines(
 DLL_EXPORT int cepton_sdk_get_number_of_sensors();
 
 DLL_EXPORT int cepton_sdk_get_sensor_handle_by_serial_number(
-    uint64_t serial_number, CeptonSensorHandle const * h);
+    uint64_t serial_number, CeptonSensorHandle * h);
 
 DLL_EXPORT struct CeptonSensorInformation const *
 cepton_sdk_get_sensor_information(CeptonSensorHandle h);
 DLL_EXPORT struct CeptonSensorInformation const *
 cepton_sdk_get_sensor_information_by_index(int sensor_index);
-
-//--------------------------------------------
-struct DLL_EXPORT CeptonSensorTransform {
-  // We use quaternion to represent rotation, this must be normalized
-  float rotation_quaternion[4];  // [Axis*sin(theta/2), cos(theta/2)]
-  float translation[3];          // X, Y, Z, [m]
-};
-DLL_EXPORT extern const size_t cepton_sensor_transform_size;
-
-DLL_EXPORT int cepton_sdk_clear_transform(CeptonSensorHandle h);
-DLL_EXPORT int cepton_sdk_set_transform(
-    CeptonSensorHandle h, struct CeptonSensorTransform const *transform);
-DLL_EXPORT int cepton_sdk_has_transform(CeptonSensorHandle h,
-                                        int *has_transform);
-DLL_EXPORT int cepton_sdk_get_transform(
-    CeptonSensorHandle h, struct CeptonSensorTransform *transform);
 
 //--------------------------------------------
 // Mock Sensor replay and capture

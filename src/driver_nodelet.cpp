@@ -3,6 +3,7 @@
 #include <cmath>
 #include <cstdint>
 
+#include <pcl_conversions/pcl_conversions.h>
 #include <pluginlib/class_list_macros.h>
 
 PLUGINLIB_EXPORT_CLASS(cepton_ros::DriverNodelet, nodelet::Nodelet);
@@ -190,7 +191,8 @@ void DriverNodelet::image_points_callback(
   points.resize(n_points);
 
   // Publish
-  uint64_t message_timestamp = image_points[n_image_points - 1].timestamp;
+  // uint64_t message_timestamp = image_points[n_image_points - 1].timestamp;
+  uint64_t message_timestamp = pcl_conversions::toPCL(ros::Time::now());
   publish_sensor_information(*sensor_information_ptr);
   publish_image_points(sensor_name, message_timestamp, n_image_points,
                        image_points);
@@ -205,6 +207,9 @@ void DriverNodelet::convert_image_to_points(
   point.x = -image_point.image_x * ratio;
   point.y = ratio;
   point.z = -image_point.image_z * ratio;
+
+  point.timestamp = image_point.timestamp;
+  point.intensity = image_point.intensity;
 }
 
 void DriverNodelet::publish_sensor_information(
