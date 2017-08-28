@@ -16,20 +16,6 @@
 namespace cepton_ros {
 
 class DriverNodelet : public nodelet::Nodelet {
- private:
-  ros::NodeHandle node_handle;
-  ros::NodeHandle private_node_handle;
-
-  bool combine_sensors = false;
-  std::string output_namespace = "cepton";
-  bool use_sensor_time = false;
-
-  ros::Publisher sensor_information_publisher;
-  ros::Publisher combined_image_points_publisher;
-  ros::Publisher combined_points_publisher;
-  std::map<std::string, ros::Publisher> sensor_image_points_publishers;
-  std::map<std::string, ros::Publisher> sensor_points_publishers;
-
  public:
   ~DriverNodelet();
 
@@ -64,6 +50,22 @@ class DriverNodelet : public nodelet::Nodelet {
                       uint64_t message_timestamp, std::size_t n_points,
                       CeptonSensorPoint const *points);
 
-  std::vector<CeptonSensorPoint> points;
+ private:
+  ros::NodeHandle node_handle;
+  ros::NodeHandle private_node_handle;
+
+  bool combine_sensors = false;
+  int n_frames_per_message = 2;
+  std::string output_namespace = "cepton";
+
+  ros::Publisher sensor_information_publisher;
+  ros::Publisher combined_image_points_publisher;
+  ros::Publisher combined_points_publisher;
+  std::map<std::string, ros::Publisher> sensor_image_points_publishers;
+  std::map<std::string, ros::Publisher> sensor_points_publishers;
+
+  std::size_t n_cached_frames = 0;
+  std::vector<CeptonSensorImagePoint> image_points_cache;
+  std::vector<CeptonSensorPoint> points_cache;
 };
 }  // namespace cepton_ros

@@ -18,16 +18,6 @@ class Driver {
   using PointsCallback = std::function<void(
       int, CeptonSensorHandle, std::size_t, CeptonSensorPoint const *)>;
 
- private:
-  std::shared_ptr<Driver> instance_ptr;
-
-  std::atomic<bool> initialized{false};
-  std::mutex internal_mutex;
-
-  EventCallback event_callback;
-  ImagePointsCallback image_points_callback;
-  PointsCallback points_callback;
-
  public:
   Driver() = default;
   ~Driver();
@@ -52,5 +42,15 @@ class Driver {
   friend void driver_image_points_callback(
       int error_code, CeptonSensorHandle sensor_handle, std::size_t n_points,
       CeptonSensorImagePoint const *image_points);
+
+ private:
+  std::shared_ptr<Driver> instance_ptr;
+
+  std::atomic<bool> initialized{false};
+  std::mutex internal_mutex;
+
+  EventCallback event_callback;
+  ImagePointsCallback image_points_callback;
+  PointsCallback points_callback;
 };
 }  // namespace cepton_ros

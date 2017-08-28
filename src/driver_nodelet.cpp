@@ -10,9 +10,7 @@ PLUGINLIB_EXPORT_CLASS(cepton_ros::DriverNodelet, nodelet::Nodelet);
 
 namespace {
 
-float square(float x) {
-  return x * x;
-}
+float square(float x) { return x * x; }
 
 std::string get_sensor_name(const CeptonSensorInformation &sensor_information) {
   return std::to_string(sensor_information.serial_number);
@@ -37,11 +35,13 @@ void DriverNodelet::onInit() {
                             combine_sensors);
   int control_flags = 0;
   private_node_handle.param("control_flags", control_flags, control_flags);
+  private_node_handle.param("n_frames_per_message", n_frames_per_message,
+                            n_frames_per_message);
   private_node_handle.param("output_namespace", output_namespace,
                             output_namespace);
 
-  private_node_handle.param("use_sensor_time", use_sensor_time,
-                            use_sensor_time);
+  NODELET_INFO("Sdfsdf");
+  NODELET_INFO("%s", capture_path.c_str());
 
   const std::string sensor_information_topic_id =
       output_namespace + "_sensor_information";
@@ -78,8 +78,20 @@ void DriverNodelet::onInit() {
   // Start capture
   if (!capture_path.empty()) {
     int error_code;
+
     error_code = cepton_sdk_capture_replay_open(capture_path.c_str());
+    if (error_code < 0) {
+      NODELET_FATAL("capture replay failed: %s",
+                    cepton_get_error_code_name(error_code));
+      return;
+    }
+
     error_code = cepton_sdk_capture_replay_resume(true);
+    if (error_code < 0) {
+      NODELET_FATAL("capture replay failed: %s",
+                    cepton_get_error_code_name(error_code));
+      return;
+    }
   }
 }
 
@@ -142,7 +154,8 @@ void DriverNodelet::event_callback(
     int error_code, CeptonSensorHandle sensor_handle,
     CeptonSensorInformation const *sensor_information_ptr, int sensor_event) {
   if (error_code < 0) {
-    NODELET_WARN("event callback failed: [error code %i]", error_code);
+    NODELET_WARN("event callback failed: %s",
+                 cepton_get_error_code_name(error_code));
     return;
   }
   std::string sensor_name = get_sensor_name(*sensor_information_ptr);
@@ -160,13 +173,15 @@ void DriverNodelet::event_callback(
 }
 
 void DriverNodelet::image_points_callback(
-    int error_code, CeptonSensorHandle sensor_handle, std::size_t n_image_points,
-    CeptonSensorImagePoint const *image_points) {
+    int error_code, CeptonSensorHandle sensor_handle,
+    std::size_t n_image_points, CeptonSensorImagePoint const *image_points) {
   if (error_code < 0) {
-    NODELET_WARN("image points callback failed: error code %i", error_code);
+    NODELET_WARN("image points callback failed: %s",
+                 cepton_get_error_code_name(error_code));
     return;
   }
 
+  // Get sensor info
   CeptonSensorInformation const *sensor_information_ptr =
       cepton_sdk_get_sensor_information(sensor_handle);
   if (!sensor_information_ptr) {
@@ -176,27 +191,41 @@ void DriverNodelet::image_points_callback(
   }
   std::string sensor_name = get_sensor_name(*sensor_information_ptr);
 
-  // Convert to points
-  points.clear();
-  points.resize(n_image_points);
-  std::size_t i_point = 0;
+  // Cache image points
+  image_points_cache.reserve(image_points_cache.size() + n_image_points);
   for (std::size_t i_image_point = 0; i_image_point < n_image_points;
        ++i_image_point) {
-    if (image_points[i_image_point].distance == 0) continue;
-
-    convert_image_to_points(image_points[i_image_point], points[i_point]);
-    ++i_point;
+    image_points_cache.push_back(image_points[i_image_point]);
   }
-  std::size_t n_points = i_point;
-  points.resize(n_points);
+
+  ++n_cached_frames;
 
   // Publish
-  // uint64_t message_timestamp = image_points[n_image_points - 1].timestamp;
   uint64_t message_timestamp = pcl_conversions::toPCL(ros::Time::now());
   publish_sensor_information(*sensor_information_ptr);
-  publish_image_points(sensor_name, message_timestamp, n_image_points,
-                       image_points);
-  publish_points(sensor_name, message_timestamp, n_points, points.data());
+  if (n_cached_frames >= n_frames_per_message) {
+    // Convert to points
+    points_cache.resize(image_points_cache.size());
+    std::size_t i_point = 0;
+    for (std::size_t i_image_point = 0;
+         i_image_point < image_points_cache.size(); ++i_image_point) {
+      if (image_points_cache[i_image_point].distance == 0) continue;
+
+      convert_image_to_points(image_points_cache[i_image_point],
+                              points_cache[i_point]);
+      ++i_point;
+    }
+    points_cache.resize(i_point);
+
+    publish_image_points(sensor_name, message_timestamp,
+                         image_points_cache.size(), image_points_cache.data());
+    publish_points(sensor_name, message_timestamp, points_cache.size(),
+                   points_cache.data());
+
+    image_points_cache.clear();
+    points_cache.clear();
+    n_cached_frames = 0;
+  }
 }
 
 void DriverNodelet::convert_image_to_points(

@@ -1,12 +1,15 @@
 <launch>
   <arg name="capture_path" default="" doc="capture file path"/>
+  <arg name="control_flags" default="0" doc="sdk control flags"/>
+  <arg name="n_frames_per_message" default="2" doc="number of sensor frames per message"/>
   <arg name="output_namespace" default="cepton" doc="prefix for names"/>
-  <arg name="parent_frame_id" default="world" doc="parent transform frame"/>
 
   <!-- Launch driver -->
   <include file="$(find cepton_ros)/launch/driver.launch">
     <arg name="capture_path" value="$(arg capture_path)"/>
     <arg name="combine_sensors" value="true"/>
+    <arg name="control_flags" value="$(arg control_flags)"/>
+    <arg name="n_frames_per_message" value="$(arg n_frames_per_message)"/>
     <arg name="output_namespace" value="$(arg output_namespace)"/>
   </include>
 </launch>
