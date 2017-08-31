@@ -11,11 +11,7 @@ PLUGINLIB_EXPORT_CLASS(cepton_ros::DriverNodelet, nodelet::Nodelet);
 namespace {
 
 float square(float x) { return x * x; }
-
-std::string get_sensor_name(const CeptonSensorInformation &sensor_information) {
-  return std::to_string(sensor_information.serial_number);
-}
-}  // namespace
+} // namespace
 
 namespace cepton_ros {
 
@@ -40,9 +36,6 @@ void DriverNodelet::onInit() {
   private_node_handle.param("output_namespace", output_namespace,
                             output_namespace);
 
-  NODELET_INFO("Sdfsdf");
-  NODELET_INFO("%s", capture_path.c_str());
-
   const std::string sensor_information_topic_id =
       output_namespace + "_sensor_information";
   sensor_information_publisher =
@@ -50,10 +43,10 @@ void DriverNodelet::onInit() {
 
   if (combine_sensors) {
     combined_image_points_publisher =
-        node_handle.advertise<sensor_msgs::PointCloud2>(
-            get_sensor_points_topic_id(""), 2);
+        node_handle.advertise<sensor_msgs::PointCloud2>(get_points_topic_id(0),
+                                                        2);
     combined_points_publisher = node_handle.advertise<sensor_msgs::PointCloud2>(
-        get_sensor_points_topic_id(""), 2);
+        get_points_topic_id(0), 2);
   }
 
   // Initialize driver
@@ -95,58 +88,59 @@ void DriverNodelet::onInit() {
   }
 }
 
-std::string DriverNodelet::get_sensor_image_points_topic_id(
-    const std::string &sensor_name) const {
+std::string
+DriverNodelet::get_image_points_topic_id(uint64_t sensor_serial_number) const {
   if (combine_sensors) {
     return (output_namespace + "_image_points");
   } else {
-    return (output_namespace + "_image_points_" + sensor_name);
+    return (output_namespace + "_image_points_" +
+            std::to_string(sensor_serial_number));
   }
 }
 
-std::string DriverNodelet::get_sensor_points_topic_id(
-    const std::string &sensor_name) const {
+std::string
+DriverNodelet::get_points_topic_id(uint64_t sensor_serial_number) const {
   if (combine_sensors) {
     return (output_namespace + "_points");
   } else {
-    return (output_namespace + "_points_" + sensor_name);
+    return (output_namespace + "_points_" +
+            std::to_string(sensor_serial_number));
   }
 }
 
-std::string DriverNodelet::get_sensor_frame_id(
-    const std::string &sensor_name) const {
+std::string DriverNodelet::get_frame_id(uint64_t sensor_serial_number) const {
   if (combine_sensors) {
     return output_namespace;
   } else {
-    return (output_namespace + "_" + sensor_name);
+    return (output_namespace + "_" + std::to_string(sensor_serial_number));
   }
 }
 
-ros::Publisher &DriverNodelet::get_sensor_image_points_publisher(
-    const std::string &sensor_name) {
+ros::Publisher &
+DriverNodelet::get_image_points_publisher(uint64_t sensor_serial_number) {
   if (combine_sensors) {
     return combined_image_points_publisher;
   } else {
-    if (!sensor_image_points_publishers.count(sensor_name)) {
-      std::string topic_id = get_sensor_image_points_topic_id(sensor_name);
-      sensor_image_points_publishers[sensor_name] =
+    if (!image_points_publishers.count(sensor_serial_number)) {
+      std::string topic_id = get_image_points_topic_id(sensor_serial_number);
+      image_points_publishers[sensor_serial_number] =
           node_handle.advertise<sensor_msgs::PointCloud2>(topic_id, 10);
     }
-    return sensor_image_points_publishers.at(sensor_name);
+    return image_points_publishers.at(sensor_serial_number);
   }
 }
 
-ros::Publisher &DriverNodelet::get_sensor_points_publisher(
-    const std::string &sensor_name) {
+ros::Publisher &
+DriverNodelet::get_points_publisher(uint64_t sensor_serial_number) {
   if (combine_sensors) {
     return combined_points_publisher;
   } else {
-    if (!sensor_points_publishers.count(sensor_name)) {
-      std::string topic_id = get_sensor_points_topic_id(sensor_name);
-      sensor_points_publishers[sensor_name] =
+    if (!points_publishers.count(sensor_serial_number)) {
+      std::string topic_id = get_points_topic_id(sensor_serial_number);
+      points_publishers[sensor_serial_number] =
           node_handle.advertise<sensor_msgs::PointCloud2>(topic_id, 10);
     }
-    return sensor_points_publishers.at(sensor_name);
+    return points_publishers.at(sensor_serial_number);
   }
 }
 
@@ -158,17 +152,18 @@ void DriverNodelet::event_callback(
                  cepton_get_error_code_name(error_code));
     return;
   }
-  std::string sensor_name = get_sensor_name(*sensor_information_ptr);
+
+  uint64_t sensor_serial_number = sensor_information_ptr->serial_number;
 
   switch (sensor_event) {
-    case CEPTON_EVENT_ATTACH:
-      NODELET_INFO("sensor connected: %s", sensor_name.c_str());
-      break;
-    case CEPTON_EVENT_DETACH:
-      NODELET_INFO("sensor disconnected: %s", sensor_name.c_str());
-      break;
-    case CEPTON_EVENT_FRAME:
-      break;
+  case CEPTON_EVENT_ATTACH:
+    NODELET_INFO("sensor connected: %i", sensor_serial_number);
+    break;
+  case CEPTON_EVENT_DETACH:
+    NODELET_INFO("sensor disconnected: %i", sensor_serial_number);
+    break;
+  case CEPTON_EVENT_FRAME:
+    break;
   }
 }
 
@@ -189,42 +184,31 @@ void DriverNodelet::image_points_callback(
                  sensor_handle);
     return;
   }
-  std::string sensor_name = get_sensor_name(*sensor_information_ptr);
+  uint64_t sensor_serial_number = sensor_information_ptr->serial_number;
 
   // Cache image points
-  image_points_cache.reserve(image_points_cache.size() + n_image_points);
+  auto &image_points_cache_tmp = image_points_cache[sensor_serial_number];
+  image_points_cache_tmp.reserve(image_points_cache_tmp.size() +
+                                 n_image_points);
   for (std::size_t i_image_point = 0; i_image_point < n_image_points;
        ++i_image_point) {
-    image_points_cache.push_back(image_points[i_image_point]);
+    image_points_cache_tmp.push_back(image_points[i_image_point]);
   }
 
-  ++n_cached_frames;
+  if (!n_cached_frames.count(sensor_serial_number))
+    n_cached_frames[sensor_serial_number] = 0;
+  auto &n_cached_frames_tmp = n_cached_frames.at(sensor_serial_number);
+  ++n_cached_frames_tmp;
 
   // Publish
   uint64_t message_timestamp = pcl_conversions::toPCL(ros::Time::now());
   publish_sensor_information(*sensor_information_ptr);
-  if (n_cached_frames >= n_frames_per_message) {
-    // Convert to points
-    points_cache.resize(image_points_cache.size());
-    std::size_t i_point = 0;
-    for (std::size_t i_image_point = 0;
-         i_image_point < image_points_cache.size(); ++i_image_point) {
-      if (image_points_cache[i_image_point].distance == 0) continue;
+  if (n_cached_frames_tmp >= n_frames_per_message) {
+    publish_image_points(sensor_serial_number, message_timestamp);
+    publish_points(sensor_serial_number, message_timestamp);
 
-      convert_image_to_points(image_points_cache[i_image_point],
-                              points_cache[i_point]);
-      ++i_point;
-    }
-    points_cache.resize(i_point);
-
-    publish_image_points(sensor_name, message_timestamp,
-                         image_points_cache.size(), image_points_cache.data());
-    publish_points(sensor_name, message_timestamp, points_cache.size(),
-                   points_cache.data());
-
-    image_points_cache.clear();
-    points_cache.clear();
-    n_cached_frames = 0;
+    image_points_cache_tmp.clear();
+    n_cached_frames_tmp = 0;
   }
 }
 
@@ -251,17 +235,18 @@ void DriverNodelet::publish_sensor_information(
   sensor_information_publisher.publish(msg);
 }
 
-void DriverNodelet::publish_image_points(
-    const std::string &sensor_name, uint64_t message_timestamp,
-    std::size_t n_image_points, CeptonSensorImagePoint const *image_points) {
+void DriverNodelet::publish_image_points(uint64_t sensor_serial_number,
+                                         uint64_t message_timestamp) {
+  const auto &image_points = image_points_cache[sensor_serial_number];
+
   CeptonImagePointCloud::Ptr image_point_cloud_ptr(new CeptonImagePointCloud());
   image_point_cloud_ptr->header.stamp = message_timestamp;
-  image_point_cloud_ptr->header.frame_id = get_sensor_frame_id(sensor_name);
+  image_point_cloud_ptr->header.frame_id = get_frame_id(sensor_serial_number);
   image_point_cloud_ptr->height = 1;
-  image_point_cloud_ptr->width = n_image_points;
+  image_point_cloud_ptr->width = image_points.size();
 
-  image_point_cloud_ptr->resize(n_image_points);
-  for (std::size_t i_image_point = 0; i_image_point < n_image_points;
+  image_point_cloud_ptr->resize(image_points.size());
+  for (std::size_t i_image_point = 0; i_image_point < image_points.size();
        ++i_image_point) {
     const auto &cepton_image_point = image_points[i_image_point];
     auto &pcl_image_point = image_point_cloud_ptr->points[i_image_point];
@@ -272,21 +257,36 @@ void DriverNodelet::publish_image_points(
     pcl_image_point.intensity = cepton_image_point.intensity;
   }
 
-  get_sensor_image_points_publisher(sensor_name).publish(image_point_cloud_ptr);
+  get_image_points_publisher(sensor_serial_number)
+      .publish(image_point_cloud_ptr);
 }
 
-void DriverNodelet::publish_points(const std::string &sensor_name,
-                                   uint64_t message_timestamp,
-                                   std::size_t n_points,
-                                   CeptonSensorPoint const *points) {
+void DriverNodelet::publish_points(uint64_t sensor_serial_number,
+                                   uint64_t message_timestamp) {
+  const auto &image_points = image_points_cache[sensor_serial_number];
+  auto &points = points_cache[sensor_serial_number];
+
+  // Convert image points to points
+  points.clear();
+  points.resize(image_points.size());
+  std::size_t i_point = 0;
+  for (const auto &image_point : image_points) {
+    if (image_point.distance == 0)
+      continue;
+
+    convert_image_to_points(image_point, points[i_point]);
+    ++i_point;
+  }
+  points.resize(i_point);
+
   CeptonPointCloud::Ptr point_cloud_ptr(new CeptonPointCloud());
   point_cloud_ptr->header.stamp = message_timestamp;
-  point_cloud_ptr->header.frame_id = get_sensor_frame_id(sensor_name);
+  point_cloud_ptr->header.frame_id = get_frame_id(sensor_serial_number);
   point_cloud_ptr->height = 1;
-  point_cloud_ptr->width = n_points;
+  point_cloud_ptr->width = points.size();
 
-  point_cloud_ptr->resize(n_points);
-  for (std::size_t i_point = 0; i_point < n_points; ++i_point) {
+  point_cloud_ptr->resize(points.size());
+  for (std::size_t i_point = 0; i_point < points.size(); ++i_point) {
     const auto &cepton_point = points[i_point];
     auto &pcl_point = point_cloud_ptr->points[i_point];
     pcl_point.timestamp = cepton_point.timestamp;
@@ -296,7 +296,7 @@ void DriverNodelet::publish_points(const std::string &sensor_name,
     pcl_point.intensity = cepton_point.intensity;
   }
 
-  get_sensor_points_publisher(sensor_name).publish(point_cloud_ptr);
+  get_points_publisher(sensor_serial_number).publish(point_cloud_ptr);
 }
 
-}  // namespace cepton_ros
+} // namespace cepton_ros

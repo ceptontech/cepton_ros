@@ -16,7 +16,7 @@
 namespace cepton_ros {
 
 class DriverNodelet : public nodelet::Nodelet {
- public:
+public:
   ~DriverNodelet();
 
   void event_callback(int error_code, CeptonSensorHandle sensor_handle,
@@ -26,31 +26,27 @@ class DriverNodelet : public nodelet::Nodelet {
                              std::size_t n_points,
                              CeptonSensorImagePoint const *image_points);
 
- protected:
+protected:
   void onInit() override;
 
- private:
-  std::string get_sensor_image_points_topic_id(
-      const std::string &sensor_name) const;
-  std::string get_sensor_points_topic_id(const std::string &sensor_name) const;
-  std::string get_sensor_frame_id(const std::string &sensor_name) const;
-  ros::Publisher &get_sensor_image_points_publisher(
-      const std::string &sensor_name);
-  ros::Publisher &get_sensor_points_publisher(const std::string &sensor_name);
+private:
+  std::string get_image_points_topic_id(uint64_t sensor_serial_number) const;
+  std::string get_points_topic_id(uint64_t sensor_serial_number) const;
+  std::string get_frame_id(uint64_t sensor_serial_number) const;
+  ros::Publisher &get_image_points_publisher(uint64_t sensor_serial_number);
+  ros::Publisher &get_points_publisher(uint64_t sensor_serial_number);
 
   void convert_image_to_points(const CeptonSensorImagePoint &image_point,
                                CeptonSensorPoint &point);
-  void publish_sensor_information(
-      const CeptonSensorInformation &sensor_information);
+  void
+  publish_sensor_information(const CeptonSensorInformation &sensor_information);
 
-  void publish_image_points(const std::string &sensor_name,
-                            uint64_t message_timestamp, std::size_t n_points,
-                            CeptonSensorImagePoint const *image_points);
-  void publish_points(const std::string &sensor_name,
-                      uint64_t message_timestamp, std::size_t n_points,
-                      CeptonSensorPoint const *points);
+  void publish_image_points(uint64_t sensor_serial_number,
+                            uint64_t message_timestamp);
+  void publish_points(uint64_t sensor_serial_number,
+                      uint64_t message_timestamp);
 
- private:
+private:
   ros::NodeHandle node_handle;
   ros::NodeHandle private_node_handle;
 
@@ -61,11 +57,10 @@ class DriverNodelet : public nodelet::Nodelet {
   ros::Publisher sensor_information_publisher;
   ros::Publisher combined_image_points_publisher;
   ros::Publisher combined_points_publisher;
-  std::map<std::string, ros::Publisher> sensor_image_points_publishers;
-  std::map<std::string, ros::Publisher> sensor_points_publishers;
-
-  std::size_t n_cached_frames = 0;
-  std::vector<CeptonSensorImagePoint> image_points_cache;
-  std::vector<CeptonSensorPoint> points_cache;
+  std::map<uint64_t, ros::Publisher> image_points_publishers;
+  std::map<uint64_t, ros::Publisher> points_publishers;
+  std::map<uint64_t, std::size_t> n_cached_frames;
+  std::map<uint64_t, std::vector<CeptonSensorImagePoint>> image_points_cache;
+  std::map<uint64_t, std::vector<CeptonSensorPoint>> points_cache;
 };
-}  // namespace cepton_ros
+} // namespace cepton_ros

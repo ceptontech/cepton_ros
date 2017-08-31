@@ -47,10 +47,17 @@ enum CeptonSensorEvent {
   CEPTON_EVENT_FRAME = 3,
 };
 
+enum CeptonSensorModel {
+  HR80T = 1,
+  HR80M = 2,
+  HR80W = 3,
+};
+
 struct DLL_EXPORT CeptonSensorInformation {
   CeptonSensorHandle handle;
   uint64_t serial_number;
-  char model_name[32];
+  char model_name[28];
+  int32_t model;
   char firmware_version[32];
 
   float last_reported_temperature;  // [celsius]
