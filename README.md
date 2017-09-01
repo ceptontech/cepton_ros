@@ -62,3 +62,4 @@ If no points are seen when running `demo_single.launch`, the most likely cause i
 This driver has been tested on the following environments:
 
 - ROS Indigo | Ubuntu 14.04
+- ROS Kinetic | Ubuntu 16.04
