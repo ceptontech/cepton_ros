@@ -30,6 +30,19 @@ protected:
   void onInit() override;
 
 private:
+  struct SensorData {
+    void clear() {
+      n_cached_frames = 0;
+      image_points.clear();
+      points.clear();
+    }
+
+    std::size_t n_cached_frames = 0;
+    std::vector<CeptonSensorImagePoint> image_points;
+    std::vector<CeptonSensorPoint> points;
+  };
+
+private:
   std::string get_image_points_topic_id(uint64_t sensor_serial_number) const;
   std::string get_points_topic_id(uint64_t sensor_serial_number) const;
   std::string get_frame_id(uint64_t sensor_serial_number) const;
@@ -59,6 +72,8 @@ private:
   ros::Publisher combined_points_publisher;
   std::map<uint64_t, ros::Publisher> image_points_publishers;
   std::map<uint64_t, ros::Publisher> points_publishers;
+  
+  std::map<uint64_t, SensorData> sensor_data_map;
   std::map<uint64_t, std::size_t> n_cached_frames;
   std::map<uint64_t, std::vector<CeptonSensorImagePoint>> image_points_cache;
   std::map<uint64_t, std::vector<CeptonSensorPoint>> points_cache;

@@ -153,7 +153,7 @@ void DriverNodelet::event_callback(
     return;
   }
 
-  uint64_t sensor_serial_number = sensor_information_ptr->serial_number;
+  auto sensor_serial_number = sensor_information_ptr->serial_number;
 
   switch (sensor_event) {
   case CEPTON_EVENT_ATTACH:
@@ -184,31 +184,27 @@ void DriverNodelet::image_points_callback(
                  sensor_handle);
     return;
   }
-  uint64_t sensor_serial_number = sensor_information_ptr->serial_number;
+  auto sensor_serial_number = sensor_information_ptr->serial_number;
+  auto &sensor_data = sensor_data_map[sensor_serial_number];
 
   // Cache image points
-  auto &image_points_cache_tmp = image_points_cache[sensor_serial_number];
-  image_points_cache_tmp.reserve(image_points_cache_tmp.size() +
-                                 n_image_points);
+  sensor_data.image_points.reserve(sensor_data.image_points.size() +
+                                   n_image_points);
   for (std::size_t i_image_point = 0; i_image_point < n_image_points;
        ++i_image_point) {
-    image_points_cache_tmp.push_back(image_points[i_image_point]);
+    sensor_data.image_points.push_back(image_points[i_image_point]);
   }
 
-  if (!n_cached_frames.count(sensor_serial_number))
-    n_cached_frames[sensor_serial_number] = 0;
-  auto &n_cached_frames_tmp = n_cached_frames.at(sensor_serial_number);
-  ++n_cached_frames_tmp;
+  ++sensor_data.n_cached_frames;
 
   // Publish
   uint64_t message_timestamp = pcl_conversions::toPCL(ros::Time::now());
   publish_sensor_information(*sensor_information_ptr);
-  if (n_cached_frames_tmp >= n_frames_per_message) {
+  if (sensor_data.n_cached_frames >= n_frames_per_message) {
     publish_image_points(sensor_serial_number, message_timestamp);
     publish_points(sensor_serial_number, message_timestamp);
 
-    image_points_cache_tmp.clear();
-    n_cached_frames_tmp = 0;
+    sensor_data.clear();
   }
 }
 
@@ -237,18 +233,18 @@ void DriverNodelet::publish_sensor_information(
 
 void DriverNodelet::publish_image_points(uint64_t sensor_serial_number,
                                          uint64_t message_timestamp) {
-  const auto &image_points = image_points_cache[sensor_serial_number];
+  auto &sensor_data = sensor_data_map[sensor_serial_number];
 
   CeptonImagePointCloud::Ptr image_point_cloud_ptr(new CeptonImagePointCloud());
   image_point_cloud_ptr->header.stamp = message_timestamp;
   image_point_cloud_ptr->header.frame_id = get_frame_id(sensor_serial_number);
   image_point_cloud_ptr->height = 1;
-  image_point_cloud_ptr->width = image_points.size();
+  image_point_cloud_ptr->width = sensor_data.image_points.size();
 
-  image_point_cloud_ptr->resize(image_points.size());
-  for (std::size_t i_image_point = 0; i_image_point < image_points.size();
-       ++i_image_point) {
-    const auto &cepton_image_point = image_points[i_image_point];
+  image_point_cloud_ptr->resize(sensor_data.image_points.size());
+  for (std::size_t i_image_point = 0;
+       i_image_point < sensor_data.image_points.size(); ++i_image_point) {
+    const auto &cepton_image_point = sensor_data.image_points[i_image_point];
     auto &pcl_image_point = image_point_cloud_ptr->points[i_image_point];
     pcl_image_point.timestamp = cepton_image_point.timestamp;
     pcl_image_point.image_x = cepton_image_point.image_x;
@@ -263,31 +259,31 @@ void DriverNodelet::publish_image_points(uint64_t sensor_serial_number,
 
 void DriverNodelet::publish_points(uint64_t sensor_serial_number,
                                    uint64_t message_timestamp) {
-  const auto &image_points = image_points_cache[sensor_serial_number];
-  auto &points = points_cache[sensor_serial_number];
+  auto &sensor_data = sensor_data_map[sensor_serial_number];
 
   // Convert image points to points
-  points.clear();
-  points.resize(image_points.size());
+  sensor_data.points.clear();
+  sensor_data.points.resize(sensor_data.image_points.size());
   std::size_t i_point = 0;
-  for (const auto &image_point : image_points) {
+  for (const auto &image_point : sensor_data.image_points) {
     if (image_point.distance == 0)
       continue;
 
-    convert_image_to_points(image_point, points[i_point]);
+    convert_image_to_points(image_point, sensor_data.points[i_point]);
     ++i_point;
   }
-  points.resize(i_point);
+  sensor_data.points.resize(i_point);
 
   CeptonPointCloud::Ptr point_cloud_ptr(new CeptonPointCloud());
   point_cloud_ptr->header.stamp = message_timestamp;
   point_cloud_ptr->header.frame_id = get_frame_id(sensor_serial_number);
   point_cloud_ptr->height = 1;
-  point_cloud_ptr->width = points.size();
+  point_cloud_ptr->width = sensor_data.points.size();
 
-  point_cloud_ptr->resize(points.size());
-  for (std::size_t i_point = 0; i_point < points.size(); ++i_point) {
-    const auto &cepton_point = points[i_point];
+  point_cloud_ptr->resize(sensor_data.points.size());
+  for (std::size_t i_point = 0; i_point < sensor_data.points.size();
+       ++i_point) {
+    const auto &cepton_point = sensor_data.points[i_point];
     auto &pcl_point = point_cloud_ptr->points[i_point];
     pcl_point.timestamp = cepton_point.timestamp;
     pcl_point.x = cepton_point.x;
