@@ -72,7 +72,7 @@ private:
   ros::Publisher combined_points_publisher;
   std::map<uint64_t, ros::Publisher> image_points_publishers;
   std::map<uint64_t, ros::Publisher> points_publishers;
-  
+
   std::map<uint64_t, SensorData> sensor_data_map;
   std::map<uint64_t, std::size_t> n_cached_frames;
   std::map<uint64_t, std::vector<CeptonSensorImagePoint>> image_points_cache;

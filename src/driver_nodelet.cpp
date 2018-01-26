@@ -11,7 +11,7 @@ PLUGINLIB_EXPORT_CLASS(cepton_ros::DriverNodelet, nodelet::Nodelet);
 namespace {
 
 float square(float x) { return x * x; }
-} // namespace
+}  // namespace
 
 namespace cepton_ros {
 
@@ -51,19 +51,17 @@ void DriverNodelet::onInit() {
 
   // Initialize driver
   auto &driver = cepton_ros::Driver::get_instance();
-  driver.set_event_callback(
-      [this](int error_code, CeptonSensorHandle sensor_handle,
-             CeptonSensorInformation const *sensor_information_ptr,
-             int sensor_event) {
-        event_callback(error_code, sensor_handle, sensor_information_ptr,
-                       sensor_event);
-      });
-  driver.set_image_points_callback(
-      [this](int error_code, CeptonSensorHandle sensor_handle,
-             std::size_t n_points, CeptonSensorImagePoint const *image_points) {
-        image_points_callback(error_code, sensor_handle, n_points,
-                              image_points);
-      });
+  driver.set_event_callback([this](
+      int error_code, CeptonSensorHandle sensor_handle,
+      CeptonSensorInformation const *sensor_information_ptr, int sensor_event) {
+    event_callback(error_code, sensor_handle, sensor_information_ptr,
+                   sensor_event);
+  });
+  driver.set_image_points_callback([this](
+      int error_code, CeptonSensorHandle sensor_handle, std::size_t n_points,
+      CeptonSensorImagePoint const *image_points) {
+    image_points_callback(error_code, sensor_handle, n_points, image_points);
+  });
   if (!driver.initialize()) {
     NODELET_FATAL("driver initialization failed");
   }
@@ -79,7 +77,14 @@ void DriverNodelet::onInit() {
       return;
     }
 
-    error_code = cepton_sdk_capture_replay_resume(true);
+    error_code = cepton_sdk_capture_replay_set_enable_loop(true);
+    if (error_code < 0) {
+      NODELET_FATAL("capture replay failed: %s",
+                    cepton_get_error_code_name(error_code));
+      return;
+    }
+
+    error_code = cepton_sdk_capture_replay_resume();
     if (error_code < 0) {
       NODELET_FATAL("capture replay failed: %s",
                     cepton_get_error_code_name(error_code));
@@ -88,8 +93,8 @@ void DriverNodelet::onInit() {
   }
 }
 
-std::string
-DriverNodelet::get_image_points_topic_id(uint64_t sensor_serial_number) const {
+std::string DriverNodelet::get_image_points_topic_id(
+    uint64_t sensor_serial_number) const {
   if (combine_sensors) {
     return (output_namespace + "_image_points");
   } else {
@@ -98,8 +103,8 @@ DriverNodelet::get_image_points_topic_id(uint64_t sensor_serial_number) const {
   }
 }
 
-std::string
-DriverNodelet::get_points_topic_id(uint64_t sensor_serial_number) const {
+std::string DriverNodelet::get_points_topic_id(
+    uint64_t sensor_serial_number) const {
   if (combine_sensors) {
     return (output_namespace + "_points");
   } else {
@@ -116,8 +121,8 @@ std::string DriverNodelet::get_frame_id(uint64_t sensor_serial_number) const {
   }
 }
 
-ros::Publisher &
-DriverNodelet::get_image_points_publisher(uint64_t sensor_serial_number) {
+ros::Publisher &DriverNodelet::get_image_points_publisher(
+    uint64_t sensor_serial_number) {
   if (combine_sensors) {
     return combined_image_points_publisher;
   } else {
@@ -130,8 +135,8 @@ DriverNodelet::get_image_points_publisher(uint64_t sensor_serial_number) {
   }
 }
 
-ros::Publisher &
-DriverNodelet::get_points_publisher(uint64_t sensor_serial_number) {
+ros::Publisher &DriverNodelet::get_points_publisher(
+    uint64_t sensor_serial_number) {
   if (combine_sensors) {
     return combined_points_publisher;
   } else {
@@ -156,14 +161,14 @@ void DriverNodelet::event_callback(
   auto sensor_serial_number = sensor_information_ptr->serial_number;
 
   switch (sensor_event) {
-  case CEPTON_EVENT_ATTACH:
-    NODELET_INFO("sensor connected: %i", sensor_serial_number);
-    break;
-  case CEPTON_EVENT_DETACH:
-    NODELET_INFO("sensor disconnected: %i", sensor_serial_number);
-    break;
-  case CEPTON_EVENT_FRAME:
-    break;
+    case CEPTON_EVENT_ATTACH:
+      NODELET_INFO("sensor connected: %i", sensor_serial_number);
+      break;
+    case CEPTON_EVENT_DETACH:
+      NODELET_INFO("sensor disconnected: %i", sensor_serial_number);
+      break;
+    case CEPTON_EVENT_FRAME:
+      break;
   }
 }
 
@@ -197,10 +202,19 @@ void DriverNodelet::image_points_callback(
 
   ++sensor_data.n_cached_frames;
 
-  // Publish
-  uint64_t message_timestamp = pcl_conversions::toPCL(ros::Time::now());
+  // Publish sensor info
   publish_sensor_information(*sensor_information_ptr);
+
+  // Publish points
   if (sensor_data.n_cached_frames >= n_frames_per_message) {
+    // // HACK: Clip points
+    // for (auto & image_point: sensor_data.image_points) {
+    //   if (image_point.distance < 2.5f) {
+    //     image_point.distance = 0.0f;
+    //   }
+    // }
+
+    uint64_t message_timestamp = pcl_conversions::toPCL(ros::Time::now());
     publish_image_points(sensor_serial_number, message_timestamp);
     publish_points(sensor_serial_number, message_timestamp);
 
@@ -266,8 +280,7 @@ void DriverNodelet::publish_points(uint64_t sensor_serial_number,
   sensor_data.points.resize(sensor_data.image_points.size());
   std::size_t i_point = 0;
   for (const auto &image_point : sensor_data.image_points) {
-    if (image_point.distance == 0)
-      continue;
+    if (image_point.distance == 0.0f) continue;
 
     convert_image_to_points(image_point, sensor_data.points[i_point]);
     ++i_point;
@@ -295,4 +308,4 @@ void DriverNodelet::publish_points(uint64_t sensor_serial_number,
   get_points_publisher(sensor_serial_number).publish(point_cloud_ptr);
 }
 
-} // namespace cepton_ros
+}  // namespace cepton_ros

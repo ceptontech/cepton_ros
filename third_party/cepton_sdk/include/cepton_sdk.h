@@ -1,7 +1,10 @@
 //
 // Copyright Cepton Technologies Inc. 2017, All rights reserved.
 //
-// Cepton Sensor SDK v0.7a (Beta)
+// Cepton Sensor SDK v0.9 (Beta)
+//
+// NOTE: CEPTON_SDK_VERSION is independent of the version string,
+//       it is used to enforce API compatibility
 //
 #pragma once
 
@@ -18,10 +21,16 @@
 extern "C" {
 #endif
 
-#define CEPTON_SDK_VERSION 7
+#define CEPTON_SDK_VERSION 9
 
-typedef uint64_t CeptonSensorHandle;  // Handle of the sensor device
 
+//------------------------------------------------------------------------------
+// Types
+//------------------------------------------------------------------------------
+
+/*
+  Error code returned by most SDK functions
+*/
 enum CeptonSensorErrorCode {
   CEPTON_SUCCESS = 0,
   CEPTON_ERROR_GENERIC = -1,
@@ -34,30 +43,36 @@ enum CeptonSensorErrorCode {
   CEPTON_ERROR_INVALID_ARGUMENTS = -8,
   CEPTON_ERROR_ALREADY_INITIALIZED = -9,
   CEPTON_ERROR_NOT_INITIALIZED = -10,
+  CEPTON_ERROR_INVALID_FILE_TYPE = -11,
+  CEPTON_ERROR_FILE_IO = -12,
+  CEPTON_ERROR_CORRUPT_FILE = -13,
+  CEPTON_ERROR_NOT_OPEN = -14,
+  CEPTON_ERROR_EOF = -15,
 };
 
+/*
+  Returns string name of error code.
+*/
 const char *const cepton_get_error_code_name(int error_code);
 
-enum CeptonSensorEvent {
-  CEPTON_EVENT_ATTACH = 1,
-  /*
-    Not used
-  */
-  CEPTON_EVENT_DETACH = 2,
-  CEPTON_EVENT_FRAME = 3,
-};
+/*
+  Sensor device identifier
+*/
+typedef uint64_t CeptonSensorHandle;
 
 enum CeptonSensorModel {
   HR80T = 1,
   HR80M = 2,
   HR80W = 3,
+  SORA_200 = 4,
+  VISTA_860 = 5,
 };
 
 struct DLL_EXPORT CeptonSensorInformation {
   CeptonSensorHandle handle;
   uint64_t serial_number;
   char model_name[28];
-  int32_t model;
+  uint32_t model;
   char firmware_version[32];
 
   float last_reported_temperature;  // [celsius]
@@ -73,6 +88,7 @@ struct DLL_EXPORT CeptonSensorInformation {
   uint8_t gps_ts_sec;    // 0-59
 
   uint8_t sensor_index;  // Internal index, can be passed to _by_index functions
+  uint8_t return_count;  // 1 for single return, 2 for double return
 
   // flags
   uint32_t is_mocked : 1;          // Set if this device is created through
@@ -82,16 +98,33 @@ struct DLL_EXPORT CeptonSensorInformation {
   uint32_t is_calibrated : 1;
 };
 DLL_EXPORT extern const size_t cepton_sensor_information_size;
-//--------------------------------------------
-// Global state/service management
+
+//------------------------------------------------------------------------------
+// SDK Setup
+//------------------------------------------------------------------------------
+
+enum CeptonSensorEvent {
+  /*
+    New sensor
+  */
+  CEPTON_EVENT_ATTACH = 1,
+  /*
+    DEPRICATED
+  */
+  CEPTON_EVENT_DETACH = 2,
+  /*
+    New frame
+  */
+  CEPTON_EVENT_FRAME = 3,
+};
 
 typedef void (*FpCeptonSensorEventCallback)(
     int error_code, CeptonSensorHandle sensor,
     struct CeptonSensorInformation const *p_info, int sensor_event);
 
-enum {
+enum CeptonSDKControl {
   /*
-    DEPRICATED.
+    DEPRICATED
   */
   CEPTON_SDK_CONTROL_FLAGS_RESERVED = 1 << 0,
   /*
@@ -108,19 +141,27 @@ enum {
     Disable clipping distance.
   */
   CEPTON_SDK_CONTROL_DISABLE_DISTANCE_CLIP = 1 << 3,
+
+  /*
+    Multiple returns
+    When set, return_count in CeptonSensorInformation will indicate
+    number of returns per laser.
+  */
+  CEPTON_SDK_CONTROL_ENABLED_MULTIPLE_RETURNS = 1 << 4,
 };
 
 DLL_EXPORT int cepton_sdk_is_initialized();
 
 /*
-  Initialize will allocate buffers, make connections, launch threads etc.
-  Flag is a bit field defined by the enum above
+  Initializes SDK. Must be called before all SDK function calls.
+  Returns `CEPTON_ERROR_ALREADY_INITIALIZED` if SDK is already initialized.
 */
 DLL_EXPORT int cepton_sdk_initialize(int ver, uint32_t control_flags,
                                      FpCeptonSensorEventCallback cb);
 
 /*
-  Deallocate and disconnect
+  Deinitializes SDK. Must be called after all SDK function calls.
+  Returns`CEPTON_ERROR_NOT_INITIALIZED` if SDK is not initialized.
 */
 DLL_EXPORT int cepton_sdk_deinitialize();
 
@@ -131,8 +172,10 @@ DLL_EXPORT size_t cepton_sdk_get_n_ports();
 DLL_EXPORT void cepton_sdk_get_ports(uint16_t *ports);
 DLL_EXPORT int cepton_sdk_set_ports(const uint16_t *const ports, size_t n_ports);
 
-//--------------------------------------------
-// Receiving data from sensor
+//------------------------------------------------------------------------------
+// Points
+//------------------------------------------------------------------------------
+
 struct DLL_EXPORT CeptonSensorPoint {
   uint64_t timestamp;  // time since epoch [microseconds]
   float x, y, z;       // [meters]
@@ -165,6 +208,9 @@ struct DLL_EXPORT CeptonSensorImagePoint {
   float distance;      // distance [meters]
   float image_z;       // z image coordinate
   float intensity;     // 0-1 scaled intensity
+  uint8_t return_number; // 0, 1 etc.
+  uint8_t valid;       // 1-valid, 0-clipped or invalid return
+  uint8_t padding[2];  // For future expansion
 };
 DLL_EXPORT extern const size_t cepton_sensor_image_point_size;
 
@@ -188,8 +234,10 @@ DLL_EXPORT int cepton_sdk_listen_image_scanlines(
 DLL_EXPORT int cepton_sdk_unlisten_image_scanlines(
     FpCeptonSensorImageDataCallback cb);
 
-//--------------------------------------------
-// Discover connected sensors
+//------------------------------------------------------------------------------
+// Sensors
+//------------------------------------------------------------------------------
+
 DLL_EXPORT int cepton_sdk_get_number_of_sensors();
 
 DLL_EXPORT int cepton_sdk_get_sensor_handle_by_serial_number(
@@ -200,8 +248,9 @@ cepton_sdk_get_sensor_information(CeptonSensorHandle h);
 DLL_EXPORT struct CeptonSensorInformation const *
 cepton_sdk_get_sensor_information_by_index(int sensor_index);
 
-//--------------------------------------------
-// Mock Sensor replay and capture
+//------------------------------------------------------------------------------
+// Capture/Replay
+//------------------------------------------------------------------------------
 
 /*
   Manually pass packets to SDK. Blocks while processing, and calls listener
@@ -211,7 +260,9 @@ DLL_EXPORT void cepton_sdk_mock_network_receive(uint64_t ipv4_address,
                                                 uint8_t const *buffer,
                                                 size_t size);
 
-// Set to 0 to reset back to current time based mocking.
+/*
+  Set to 0 to reset back to current time based mocking.
+*/
 DLL_EXPORT void cepton_sdk_set_mock_time_base(uint64_t time_base);
 
 typedef void (*FpCeptonNetworkReceiveCb)(int error_code, uint64_t ipv4_address,
@@ -257,6 +308,15 @@ DLL_EXPORT int cepton_sdk_capture_replay_rewind();
 DLL_EXPORT int cepton_sdk_capture_replay_seek(float sec);
 
 /*
+  If loop enabled, replay will automatically rewind at end.
+*/
+DLL_EXPORT int cepton_sdk_capture_replay_set_enable_loop(int enable_loop);
+DLL_EXPORT int cepton_sdk_capture_replay_get_enable_loop(int *enable_loop_ptr);
+
+DLL_EXPORT int cepton_sdk_capture_replay_set_speed(float speed);
+DLL_EXPORT int cepton_sdk_capture_replay_get_speed(float *speed_ptr);
+
+/*
   Replay next packet in current thread without sleeping.
   Pauses replay thread if it is running.
   Stops at end of file; must call rewind to continue.
@@ -285,7 +345,7 @@ DLL_EXPORT int cepton_sdk_capture_replay_is_running(int *is_running_ptr);
 
   Returns error if replay is not open.
 */
-DLL_EXPORT int cepton_sdk_capture_replay_resume(int enable_loop);
+DLL_EXPORT int cepton_sdk_capture_replay_resume();
 
 /*
   Pause asynchronous replay thread.
