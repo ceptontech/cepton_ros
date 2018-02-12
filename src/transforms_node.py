@@ -2,6 +2,8 @@
 
 import json
 
+import numpy
+
 import rospy
 import tf
 
@@ -26,8 +28,14 @@ class TransformsNode(object):
 
     def publish_transforms(self):
         for sensor_name, transform in self.transforms_dict.items():
-            translation = transform["translation"]
-            rotation = transform["rotation"]
+            if "translation" in transform:
+                translation = transform["translation"]
+            else:
+                translation = numpy.zeros(3)
+            if "rotation" in transform:
+                rotation = transform["rotation"]
+            else:
+                rotation = numpy.array([0.0, 0.0, 0.0, 1.0])
 
             frame_id = self.get_sensor_frame_id(sensor_name)
             self.transform_broadcaster.sendTransform(

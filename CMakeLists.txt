@@ -3,8 +3,9 @@ project(cepton_ros)
 
 add_definitions(-std=c++11)
 
+# ------------------------------------------------------------------------------
 # External libraries
-# ------------------
+# ------------------------------------------------------------------------------
 # Catkin
 set(CEPTON_CATKIN_DEPENDS
   message_generation
@@ -29,8 +30,9 @@ set(CEPTON_SDK_LIBRARIES "${CEPTON_SDK_DIR}/lib/libcepton_sdk.a")
 set(CEPTON_ROS_EXTERNAL_LIBRARIES
   ${CEPTON_SDK_LIBRARIES})
 
+# ------------------------------------------------------------------------------
 # Targets
-# -------
+# ------------------------------------------------------------------------------
 include_directories(include)
 
 # Cepton ROS
@@ -56,8 +58,9 @@ set(CEPTON_ROS_LIBRARIES
   cepton_ros
 )
 
+# ------------------------------------------------------------------------------
 # Install
-# -------
+# ------------------------------------------------------------------------------
 catkin_package(
   CATKIN_DEPENDS ${CEPTON_CATKIN_DEPENDS}
   DEPENDS
