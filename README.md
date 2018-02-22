@@ -13,10 +13,7 @@ Before using this ROS driver, we recommend that you download CeptonViewer:
 
 ## Compatibility
 
-This driver has been tested on the following environments:
-
-- ROS Indigo | Ubuntu 14.04
-- ROS Kinetic | Ubuntu 16.04
+This driver only works on Ubuntu.
 
 ## Installation
 
@@ -40,7 +37,7 @@ On Ubuntu, it is necessary to assign a static IP address to the host computer's 
 
 First, try viewing the sensor in CeptonViewer, to ensure that it is connected properly. Then, launch the ROS demo (`roscore` must be running already).
 
-    $ roslaunch cepton_ros demo_single.launch
+    $ roslaunch cepton_ros demo.launch
 
 ### Using multiple sensors
 

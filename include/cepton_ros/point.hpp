@@ -15,6 +15,8 @@ struct CeptonImagePoint {
   float image_z;
   float distance;
   float intensity;
+  uint8_t return_number;
+  uint8_t valid;
 
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 };
@@ -25,6 +27,8 @@ struct CeptonPoint {
   float y;
   float z;
   float intensity;
+  uint8_t return_number;
+  uint8_t valid;
 
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 };
@@ -40,6 +44,8 @@ POINT_CLOUD_REGISTER_POINT_STRUCT(cepton_ros::CeptonImagePoint,
     (float, image_z, image_z)
     (float, distance, distance)
     (float, intensity, intensity)
+    (uint8_t, return_number, return_number)
+    (uint8_t, valid, valid)
   )
 POINT_CLOUD_REGISTER_POINT_STRUCT(cepton_ros::CeptonPoint,
     (double, timestamp, timestamp)
@@ -47,5 +53,7 @@ POINT_CLOUD_REGISTER_POINT_STRUCT(cepton_ros::CeptonPoint,
     (float, y, y)
     (float, z, z)
     (float, intensity, intensity)
+    (uint8_t, return_number, return_number)
+    (uint8_t, valid, valid)
   )
 // clang-format on

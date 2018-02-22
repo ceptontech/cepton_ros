@@ -1,9 +1,0 @@
-<launch>
-  <arg name="capture_path" value="$(find cepton_ros)/tests/1/lidar.pcap"/>
-  <arg name="transforms_path" value="$(find cepton_ros)/tests/1/cepton_transforms.json"/>
-
-  <include file="$(find cepton_ros)/launch/driver_multi.launch">
-    <arg name="capture_path" value="$(arg capture_path)"/>
-    <arg name="transforms_path" value="$(arg transforms_path)"/>
-  </include>
-</launch>

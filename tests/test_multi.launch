@@ -1,0 +1,13 @@
+<launch>
+
+  <arg name="data_path" value="$(find cepton_ros)/tests/multi"/>
+
+  <!-- Launch driver -->
+  <include file="$(find cepton_ros)/launch/driver_multi.launch">
+    <arg name="capture_path" value="$(arg data_path)/lidar.pcap"/>
+    <arg name="transforms_path" value="$(arg data_path)/cepton_transforms.json"/>
+  </include>
+
+  <!-- Launch rviz -->
+  <node pkg="rviz" type="rviz" name="cepton_rviz" required="true" args="-d $(arg data_path)/config.rviz"/>
+</launch>

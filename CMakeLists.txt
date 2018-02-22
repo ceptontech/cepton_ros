@@ -45,7 +45,6 @@ generate_messages(
   std_msgs
 )
 set(CEPTON_ROS_SOURCES
-  src/driver.cpp
   src/driver_nodelet.cpp
 )
 add_library(cepton_ros ${CEPTON_ROS_SOURCES})

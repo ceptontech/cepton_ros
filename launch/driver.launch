@@ -2,6 +2,7 @@
   <arg name="capture_path" default="" doc="capture file path"/>
   <arg name="combine_sensors" default="false" doc="if true, single topic and transform frame, otherwise one per sensor"/>
   <arg name="control_flags" default="0" doc="sdk control flags"/>
+  <arg name="frame_length" default="0.2" doc="frame length per message"/>
   <arg name="n_frames_per_message" default="2" doc="number of sensor frames per message"/>
   <arg name="output_namespace" default="cepton" doc="prefix for names"/>
 
@@ -15,7 +16,7 @@
     <param name="capture_path" value="$(arg capture_path)"/>
     <param name="combine_sensors" value="$(arg combine_sensors)"/>
     <param name="control_flags" value="$(arg control_flags)"/>
-    <param name="n_frames_per_message" value="$(arg n_frames_per_message)"/>
+    <param name="frame_length" value="$(arg frame_length)"/>
     <param name="output_namespace" value="$(arg output_namespace)"/>
   </node>
 </launch>

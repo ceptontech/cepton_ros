@@ -1,5 +1,11 @@
 <launch>
+  <arg name="capture_path" default="" doc="capture replay file path"/>
   <arg name="rviz_config_path" default="$(find cepton_ros)/config/demo_indoor.rviz" doc="rviz config file path"/>
+
+  <!-- Launch driver -->
+  <include file="$(find cepton_ros)/launch/driver_single.launch">
+    <arg name="capture_path" value="$(arg capture_path)"/>
+  </include>
 
   <!-- Launch identity transform -->
   <include file="$(find cepton_ros)/launch/identity_transform.launch">

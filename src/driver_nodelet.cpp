@@ -8,16 +8,24 @@
 
 PLUGINLIB_EXPORT_CLASS(cepton_ros::DriverNodelet, nodelet::Nodelet);
 
-namespace {
-
-float square(float x) { return x * x; }
-}  // namespace
-
 namespace cepton_ros {
 
-DriverNodelet::~DriverNodelet() {
-  auto &driver = cepton_ros::Driver::get_instance();
-  driver.deinitialize();
+DriverNodelet::~DriverNodelet() { cepton_sdk_deinitialize(); }
+
+static void global_on_error(CeptonSensorHandle sensor_handle, int error_code,
+                            const char *const error_msg,
+                            const void *const error_data,
+                            size_t error_data_size, void *user_data) {
+  ((DriverNodelet *)user_data)
+      ->on_error(sensor_handle, error_code, error_msg, error_data,
+                 error_data_size);
+}
+
+static void global_on_image_points(
+    CeptonSensorHandle sensor_handle, std::size_t n_points,
+    const CeptonSensorImagePoint *const image_points, void *const user_data) {
+  ((DriverNodelet *)user_data)
+      ->on_image_points(sensor_handle, n_points, image_points);
 }
 
 void DriverNodelet::onInit() {
@@ -31,8 +39,8 @@ void DriverNodelet::onInit() {
                             combine_sensors);
   int control_flags = 0;
   private_node_handle.param("control_flags", control_flags, control_flags);
-  private_node_handle.param("n_frames_per_message", n_frames_per_message,
-                            n_frames_per_message);
+  float frame_length = 0.2f;
+  private_node_handle.param("frame_length", frame_length, frame_length);
   private_node_handle.param("output_namespace", output_namespace,
                             output_namespace);
 
@@ -49,44 +57,51 @@ void DriverNodelet::onInit() {
         get_points_topic_id(0), 2);
   }
 
-  // Initialize driver
-  auto &driver = cepton_ros::Driver::get_instance();
-  driver.set_event_callback([this](
-      int error_code, CeptonSensorHandle sensor_handle,
-      CeptonSensorInformation const *sensor_information_ptr, int sensor_event) {
-    event_callback(error_code, sensor_handle, sensor_information_ptr,
-                   sensor_event);
-  });
-  driver.set_image_points_callback([this](
-      int error_code, CeptonSensorHandle sensor_handle, std::size_t n_points,
-      CeptonSensorImagePoint const *image_points) {
-    image_points_callback(error_code, sensor_handle, n_points, image_points);
-  });
-  if (!driver.initialize()) {
-    NODELET_FATAL("driver initialization failed");
+  // Initialize sdk
+  int error_code;
+
+  error_code = cepton_sdk_set_frame_length(frame_length);
+  if (error_code) {
+    NODELET_FATAL("cepton_sdk_set_frame_length failed: %s",
+                  cepton_get_error_code_name(error_code));
+    return;
+  }
+
+  int ver = 10;
+  error_code = cepton_sdk_initialize(10, control_flags, global_on_error, this);
+  if (error_code) {
+    NODELET_FATAL("cepton_sdk_initialize failed: %s",
+                  cepton_get_error_code_name(error_code));
+    return;
+  }
+
+  // Listen
+  error_code = cepton_sdk_listen_image_frames(global_on_image_points, this);
+  if (error_code) {
+    NODELET_FATAL("cepton_sdk_listen_image_frames failed: %s",
+                  cepton_get_error_code_name(error_code));
+    return;
   }
 
   // Start capture
   if (!capture_path.empty()) {
-    int error_code;
-
     error_code = cepton_sdk_capture_replay_open(capture_path.c_str());
-    if (error_code < 0) {
-      NODELET_FATAL("capture replay failed: %s",
+    if (error_code) {
+      NODELET_FATAL("cepton_sdk_capture_replay_open failed: %s",
                     cepton_get_error_code_name(error_code));
       return;
     }
 
     error_code = cepton_sdk_capture_replay_set_enable_loop(true);
-    if (error_code < 0) {
-      NODELET_FATAL("capture replay failed: %s",
+    if (error_code) {
+      NODELET_FATAL("cepton_sdk_capture_replay_set_enable_loop failed: %s",
                     cepton_get_error_code_name(error_code));
       return;
     }
 
     error_code = cepton_sdk_capture_replay_resume();
-    if (error_code < 0) {
-      NODELET_FATAL("capture replay failed: %s",
+    if (error_code) {
+      NODELET_FATAL("cepton_sdk_capture_replay_resume failed: %s",
                     cepton_get_error_code_name(error_code));
       return;
     }
@@ -149,90 +164,43 @@ ros::Publisher &DriverNodelet::get_points_publisher(
   }
 }
 
-void DriverNodelet::event_callback(
-    int error_code, CeptonSensorHandle sensor_handle,
-    CeptonSensorInformation const *sensor_information_ptr, int sensor_event) {
-  if (error_code < 0) {
-    NODELET_WARN("event callback failed: %s",
-                 cepton_get_error_code_name(error_code));
-    return;
-  }
-
-  auto sensor_serial_number = sensor_information_ptr->serial_number;
-
-  switch (sensor_event) {
-    case CEPTON_EVENT_ATTACH:
-      NODELET_INFO("sensor connected: %i", sensor_serial_number);
-      break;
-    case CEPTON_EVENT_DETACH:
-      NODELET_INFO("sensor disconnected: %i", sensor_serial_number);
-      break;
-    case CEPTON_EVENT_FRAME:
-      break;
-  }
+void DriverNodelet::on_error(CeptonSensorHandle sensor_handle, int error_code,
+                             const char *const error_msg,
+                             const void *const error_data,
+                             size_t error_data_size) {
+  NODELET_WARN("%s: %s", cepton_get_error_code_name(error_code), error_msg);
+  return;
 }
 
-void DriverNodelet::image_points_callback(
-    int error_code, CeptonSensorHandle sensor_handle,
-    std::size_t n_image_points, CeptonSensorImagePoint const *image_points) {
-  if (error_code < 0) {
-    NODELET_WARN("image points callback failed: %s",
-                 cepton_get_error_code_name(error_code));
-    return;
-  }
+void DriverNodelet::on_image_points(
+    CeptonSensorHandle sensor_handle, std::size_t n_points,
+    const CeptonSensorImagePoint *const p_image_points) {
+  int error_code;
 
   // Get sensor info
-  CeptonSensorInformation const *sensor_information_ptr =
-      cepton_sdk_get_sensor_information(sensor_handle);
-  if (!sensor_information_ptr) {
-    NODELET_WARN("failed to get sensor information: sensor handle %i",
-                 sensor_handle);
+  CeptonSensorInformation sensor_info;
+  error_code = cepton_sdk_get_sensor_information(sensor_handle, &sensor_info);
+  if (error_code) {
+    NODELET_WARN("cepton_sdk_get_sensor_information failed: %s",
+                 cepton_get_error_code_name(error_code));
     return;
   }
-  auto sensor_serial_number = sensor_information_ptr->serial_number;
-  auto &sensor_data = sensor_data_map[sensor_serial_number];
 
   // Cache image points
-  sensor_data.image_points.reserve(sensor_data.image_points.size() +
-                                   n_image_points);
-  for (std::size_t i_image_point = 0; i_image_point < n_image_points;
-       ++i_image_point) {
-    sensor_data.image_points.push_back(image_points[i_image_point]);
+  image_points.reserve(n_points);
+  for (std::size_t i = 0; i < n_points; ++i) {
+    image_points.push_back(p_image_points[i]);
   }
-
-  ++sensor_data.n_cached_frames;
 
   // Publish sensor info
-  publish_sensor_information(*sensor_information_ptr);
+  publish_sensor_information(sensor_info);
 
   // Publish points
-  if (sensor_data.n_cached_frames >= n_frames_per_message) {
-    // // HACK: Clip points
-    // for (auto & image_point: sensor_data.image_points) {
-    //   if (image_point.distance < 2.5f) {
-    //     image_point.distance = 0.0f;
-    //   }
-    // }
-
-    uint64_t message_timestamp = pcl_conversions::toPCL(ros::Time::now());
-    publish_image_points(sensor_serial_number, message_timestamp);
-    publish_points(sensor_serial_number, message_timestamp);
-
-    sensor_data.clear();
-  }
-}
-
-void DriverNodelet::convert_image_to_points(
-    const CeptonSensorImagePoint &image_point, CeptonSensorPoint &point) {
-  float hypotenuse_small =
-      std::sqrt(square(image_point.image_x) + square(image_point.image_z) + 1);
-  float ratio = image_point.distance / hypotenuse_small;
-  point.x = -image_point.image_x * ratio;
-  point.y = ratio;
-  point.z = -image_point.image_z * ratio;
-
-  point.timestamp = image_point.timestamp;
-  point.intensity = image_point.intensity;
+  uint64_t message_timestamp = pcl_conversions::toPCL(ros::Time::now());
+  publish_image_points(sensor_info.serial_number, message_timestamp);
+  publish_points(sensor_info.serial_number, message_timestamp);
+  image_points.clear();
+  points.clear();
 }
 
 void DriverNodelet::publish_sensor_information(
@@ -241,30 +209,31 @@ void DriverNodelet::publish_sensor_information(
   msg.handle = sensor_information.handle;
   msg.serial_number = sensor_information.serial_number;
   msg.model_name = sensor_information.model_name;
+  msg.model = sensor_information.model;
   msg.firmware_version = sensor_information.firmware_version;
   sensor_information_publisher.publish(msg);
 }
 
 void DriverNodelet::publish_image_points(uint64_t sensor_serial_number,
                                          uint64_t message_timestamp) {
-  auto &sensor_data = sensor_data_map[sensor_serial_number];
-
   CeptonImagePointCloud::Ptr image_point_cloud_ptr(new CeptonImagePointCloud());
   image_point_cloud_ptr->header.stamp = message_timestamp;
   image_point_cloud_ptr->header.frame_id = get_frame_id(sensor_serial_number);
   image_point_cloud_ptr->height = 1;
-  image_point_cloud_ptr->width = sensor_data.image_points.size();
+  image_point_cloud_ptr->width = image_points.size();
 
-  image_point_cloud_ptr->resize(sensor_data.image_points.size());
-  for (std::size_t i_image_point = 0;
-       i_image_point < sensor_data.image_points.size(); ++i_image_point) {
-    const auto &cepton_image_point = sensor_data.image_points[i_image_point];
+  image_point_cloud_ptr->resize(image_points.size());
+  for (std::size_t i_image_point = 0; i_image_point < image_points.size();
+       ++i_image_point) {
+    const auto &cepton_image_point = image_points[i_image_point];
     auto &pcl_image_point = image_point_cloud_ptr->points[i_image_point];
     pcl_image_point.timestamp = cepton_image_point.timestamp;
     pcl_image_point.image_x = cepton_image_point.image_x;
     pcl_image_point.distance = cepton_image_point.distance;
     pcl_image_point.image_z = cepton_image_point.image_z;
     pcl_image_point.intensity = cepton_image_point.intensity;
+    pcl_image_point.return_number = cepton_image_point.return_number;
+    pcl_image_point.valid = cepton_image_point.valid;
   }
 
   get_image_points_publisher(sensor_serial_number)
@@ -273,36 +242,35 @@ void DriverNodelet::publish_image_points(uint64_t sensor_serial_number,
 
 void DriverNodelet::publish_points(uint64_t sensor_serial_number,
                                    uint64_t message_timestamp) {
-  auto &sensor_data = sensor_data_map[sensor_serial_number];
-
   // Convert image points to points
-  sensor_data.points.clear();
-  sensor_data.points.resize(sensor_data.image_points.size());
+  points.clear();
+  points.resize(image_points.size());
   std::size_t i_point = 0;
-  for (const auto &image_point : sensor_data.image_points) {
+  for (const auto &image_point : image_points) {
     if (image_point.distance == 0.0f) continue;
-
-    convert_image_to_points(image_point, sensor_data.points[i_point]);
+    cepton_sdk::convert_sensor_image_point_to_point(image_point,
+                                                    points[i_point]);
     ++i_point;
   }
-  sensor_data.points.resize(i_point);
+  points.resize(i_point);
 
   CeptonPointCloud::Ptr point_cloud_ptr(new CeptonPointCloud());
   point_cloud_ptr->header.stamp = message_timestamp;
   point_cloud_ptr->header.frame_id = get_frame_id(sensor_serial_number);
   point_cloud_ptr->height = 1;
-  point_cloud_ptr->width = sensor_data.points.size();
+  point_cloud_ptr->width = points.size();
 
-  point_cloud_ptr->resize(sensor_data.points.size());
-  for (std::size_t i_point = 0; i_point < sensor_data.points.size();
-       ++i_point) {
-    const auto &cepton_point = sensor_data.points[i_point];
+  point_cloud_ptr->resize(points.size());
+  for (std::size_t i_point = 0; i_point < points.size(); ++i_point) {
+    const auto &cepton_point = points[i_point];
     auto &pcl_point = point_cloud_ptr->points[i_point];
     pcl_point.timestamp = cepton_point.timestamp;
     pcl_point.x = cepton_point.x;
     pcl_point.y = cepton_point.y;
     pcl_point.z = cepton_point.z;
     pcl_point.intensity = cepton_point.intensity;
+    pcl_point.return_number = cepton_point.return_number;
+    pcl_point.valid = cepton_point.valid;
   }
 
   get_points_publisher(sensor_serial_number).publish(point_cloud_ptr);
