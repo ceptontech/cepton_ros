@@ -4,13 +4,6 @@
 
 This package provides ROS support for the Cepton LIDAR sensor.
 
-Before using this ROS driver, we recommend that you download CeptonViewer:
-
-- [Windows](https://github.com/ceptontech/cepton_sdk_redist/raw/master/bin/win64/CeptonViewer.exe)
-- [Linux](https://github.com/ceptontech/cepton_sdk_redist/raw/master/bin/linux-x86_64/CeptonViewer)
-- [Mac](https://github.com/ceptontech/cepton_sdk_redist/raw/master/bin/osx/CeptonViewer)
-- [ARM64](https://github.com/ceptontech/cepton_sdk_redist/raw/master/bin/linux-aarch64/CeptonViewer)
-
 ## Compatibility
 
 This driver only works on Ubuntu.
@@ -21,13 +14,23 @@ If you have not done so already, install ROS, and [create a catkin workspace](ht
 
 Change to the catkin workspace directory.
 
-Clone the code.
+Clone the repository.
 
-    $ git clone git@github.com:ceptontech/cepton_ros.git src/cepton
+```sh
+$ git clone --recursive git@github.com:ceptontech/cepton_ros.git src/cepton_ros
+```
 
-Build the code.
+Run catkin make.
 
-    $ catkin_make
+```sh
+$ catkin_make
+```
+
+Source the catkin setup script.
+
+```sh
+$ source devel/setup.bash
+```
 
 ## Getting started
 
@@ -38,6 +41,8 @@ On Ubuntu, it is necessary to assign a static IP address to the host computer's 
 First, try viewing the sensor in CeptonViewer, to ensure that it is connected properly. Then, launch the ROS demo (`roscore` must be running already).
 
     $ roslaunch cepton_ros demo.launch
+
+A rviz window should popup showing a sample point cloud.
 
 ### Using multiple sensors
 
@@ -58,16 +63,3 @@ The most common issue is the host computer blocking the sensor packets. Using Wi
 ### Driver nodelet
 
 The driver nodelet is a thin wrapper around the Cepton SDK. It publishes sensor messages and PointCloud2 topics for each sensor. The point type definitions can be found in `include/cepton_ros/point.hpp`.
-
-**`cepton_ros::CeptonImagePoint`**
-
-- timestamp (uint64_t)
-- image_x, image_z (float)
-- distance (float)
-- intensity (float)
-
-**`cepton_ros::CeptonPoint`**
-
-- timestamp (uint64_t)
-- x, y, z (float)
-- intensity (float)
