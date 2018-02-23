@@ -4,9 +4,11 @@
 
 This package provides ROS support for the Cepton LIDAR sensor.
 
+Before using this ROS driver, we recommend that you download CeptonViewer.
+
 ## Compatibility
 
-This driver only works on Ubuntu.
+Currently, this driver only works on Ubuntu.
 
 ## Installation
 
@@ -62,4 +64,4 @@ The most common issue is the host computer blocking the sensor packets. Using Wi
 
 ### Driver nodelet
 
-The driver nodelet is a thin wrapper around the Cepton SDK. It publishes sensor messages and PointCloud2 topics for each sensor. The point type definitions can be found in `include/cepton_ros/point.hpp`.
+The driver nodelet is a thin wrapper around the Cepton SDK. It publishes sensor information and PointCloud2 topics for each sensor. The point type definitions can be found in `include/cepton_ros/point.hpp`.
