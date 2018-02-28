@@ -4,6 +4,12 @@ project(cepton_ros)
 add_definitions(-std=c++11)
 
 # ------------------------------------------------------------------------------
+# Variables
+# ------------------------------------------------------------------------------
+execute_process(COMMAND uname -m OUTPUT_VARIABLE MACHINE_ARCH OUTPUT_STRIP_TRAILING_WHITESPACE)
+set(OS_NAME "linux-${MACHINE_ARCH}")
+
+# ------------------------------------------------------------------------------
 # External libraries
 # ------------------------------------------------------------------------------
 # Catkin
@@ -25,7 +31,7 @@ include_directories(SYSTEM ${catkin_INCLUDE_DIRS})
 # Cepton SDK
 set(CEPTON_SDK_DIR "${PROJECT_SOURCE_DIR}/third_party/cepton_sdk")
 include_directories(SYSTEM "${CEPTON_SDK_DIR}/include")
-set(CEPTON_SDK_LIBRARIES "${CEPTON_SDK_DIR}/lib/libcepton_sdk.a")
+set(CEPTON_SDK_LIBRARIES "${CEPTON_SDK_DIR}/lib/${OS_NAME}/libcepton_sdk.a")
 
 set(CEPTON_ROS_EXTERNAL_LIBRARIES
   ${CEPTON_SDK_LIBRARIES})
