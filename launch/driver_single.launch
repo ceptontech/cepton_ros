@@ -1,7 +1,6 @@
 <launch>
   <arg name="capture_path" default="" doc="capture file path"/>
   <arg name="control_flags" default="0" doc="sdk control flags"/>
-  <arg name="frame_length" default="0.2" doc="frame length per message"/>
   <arg name="output_namespace" default="cepton" doc="prefix for names"/>
 
   <!-- Launch driver -->
@@ -9,7 +8,6 @@
     <arg name="capture_path" value="$(arg capture_path)"/>
     <arg name="combine_sensors" value="true"/>
     <arg name="control_flags" value="$(arg control_flags)"/>
-    <arg name="frame_length" value="$(arg frame_length)"/>
     <arg name="output_namespace" value="$(arg output_namespace)"/>
   </include>
 </launch>

@@ -1,17 +1,19 @@
 /*
   Copyright Cepton Technologies Inc. 2017, All rights reserved.
 
-  Cepton Sensor SDK Utilities.
+  Cepton Sensor SDK utilities.
 */
 #pragma once
 
-#include "cepton_sdk.h"
+#include "cepton_sdk.hpp"
 
 #include <cmath>
 #include <cstdio>
 
 #include <array>
 #include <chrono>
+#include <map>
+#include <thread>
 
 namespace cepton_sdk {
 
@@ -23,9 +25,9 @@ inline T square(T x) {
   return x * x;
 }
 
-/** Returns current unix timestamp in microseconds (UTC).
-
-This is the timestamp format used by all sdk functions.
+/// Returns current unix timestamp [microseconds].
+/**
+ * This is the timestamp format used by all sdk functions.
  */
 static uint64_t get_timestamp_usec() {
   auto t_epoch = std::chrono::system_clock::now().time_since_epoch();
@@ -33,59 +35,20 @@ static uint64_t get_timestamp_usec() {
 }
 
 //------------------------------------------------------------------------------
-// Errors
-//------------------------------------------------------------------------------
-/** Type checking for error callback data. Currently, not used.
-
-  If specified type is correct, returns pointer to data, otherwise returns
-  nullptr.
-*/
-template <typename T>
-const T *get_error_data(int error_code, const void *error_data,
-                        std::size_t error_data_size) {
-  if (error_data_size == 0) {
-    return nullptr;
-  }
-
-  switch (error_code) {
-    default:
-      return nullptr;
-  }
-
-  return dynamic_cast<const T *>(error_data);
-}
-
-/** Convenience method to exit on error.
-
-  If error code is nonzero, prints error code and exits program.
-  This is for sample code; production code should handle errors properly.
- */
-static void check_error_code(int error_code) {
-  if (!error_code) return;
-  const char *const error_code_name = cepton_get_error_code_name(error_code);
-  std::printf("SDK Error: %s!\n", error_code_name);
-  std::exit(-1);
-}
-
-//------------------------------------------------------------------------------
 // Points
 //------------------------------------------------------------------------------
-/** Convert image point to 3d point.
- */
-static void convert_image_point_to_point(float image_x, float image_z,
+/// Convert image point to 3d point.
+inline static void convert_image_point_to_point(float image_x, float image_z,
                                          float distance, float &x, float &y,
                                          float &z) {
-  float focal_length_squared = 1.0f;
-  float hypotenuse_small =
-      std::sqrt(square(image_x) + square(image_z) + focal_length_squared);
+  float hypotenuse_small = std::sqrt(square(image_x) + square(image_z) + 1.0f);
   float ratio = distance / hypotenuse_small;
   x = -image_x * ratio;
   y = ratio;
   z = -image_z * ratio;
 }
 
-/** 3d point class.
- */
+/// 3d point class.
 struct SensorPoint {
   uint64_t timestamp;
   float x;
@@ -96,10 +59,9 @@ struct SensorPoint {
   uint8_t valid;
 };
 
-/** Convenience method to convert `CeptonSensorImagePoint` to
- * `cepton_sdk::SensorPoint`.
- */
-static void convert_sensor_image_point_to_point(
+/// Convenience method to convert `CeptonSensorImagePoint` to
+/// `cepton_sdk::SensorPoint`.
+inline static void convert_sensor_image_point_to_point(
     const CeptonSensorImagePoint &image_point, SensorPoint &point) {
   point.timestamp = image_point.timestamp;
   point.intensity = image_point.intensity;
@@ -113,14 +75,16 @@ static void convert_sensor_image_point_to_point(
 // -----------------------------------------------------------------------------
 // Transform
 // -----------------------------------------------------------------------------
-/** Stores a translation and rotation.
+/// 3d translation and rotation.
+/**
+ * For more functionality, use Eigen's Geometry module.
  */
 class CompiledTransform {
  public:
-  /** Create from translation and rotation.
-
-    @param translation Cartesian (x, y, z)
-    @param rotation Quaternion (x, y, z, w)
+  /// Create from translation and rotation.
+  /**
+   * @param translation Cartesian (x, y, z)
+   * @param rotation Quaternion (x, y, z, w)
   */
   static CompiledTransform create(const float *const translation,
                                   const float *const rotation) {
@@ -128,6 +92,7 @@ class CompiledTransform {
     std::copy(translation, translation + 3,
               compiled_transform.translation.begin());
 
+    // Convert quaternion to rotation matrix
     float x = rotation[0];
     float y = rotation[1];
     float z = rotation[2];
@@ -157,9 +122,7 @@ class CompiledTransform {
     return compiled_transform;
   }
 
-  /**
-    Apply translation and rotation to 3d position.
-  */
+  /// Apply transformation to 3d position.
   void apply(float &x, float &y, float &z) {
     float x_tmp = x * rotation_m00 + y * rotation_m01 + z * rotation_m02;
     float y_tmp = x * rotation_m10 + y * rotation_m11 + z * rotation_m12;
@@ -174,7 +137,7 @@ class CompiledTransform {
     z = z_tmp;
   }
 
- private:
+ public:
   std::array<float, 3> translation;
 
   // Rotation matrix
@@ -188,5 +151,4 @@ class CompiledTransform {
   float rotation_m21 = 0.0f;
   float rotation_m22 = 1.0f;
 };
-
-}  // namespace cepton_sdk
+}  // cepton_sdk

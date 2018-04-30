@@ -9,7 +9,7 @@
 #include <sensor_msgs/PointCloud2.h>
 #include <tf/transform_broadcaster.h>
 
-#include <cepton_sdk.h>
+#include <cepton_sdk.hpp>
 #include <cepton_sdk_util.hpp>
 
 #include "cepton_ros/SensorInformation.h"
@@ -21,11 +21,12 @@ class DriverNodelet : public nodelet::Nodelet {
  public:
   ~DriverNodelet();
 
-  void on_error(CeptonSensorHandle sensor_handle, int error_code,
+  void on_error(cepton_sdk::SensorHandle sensor_handle, int error_code,
                 const char *const error_msg, const void *const error_data,
                 size_t error_data_size);
-  void on_image_points(CeptonSensorHandle sensor_handle, std::size_t n_points,
-                       const CeptonSensorImagePoint *const p_image_points);
+  void on_image_points(
+      cepton_sdk::SensorHandle sensor_handle, std::size_t n_points,
+      const cepton_sdk::SensorImagePoint *const p_image_points);
 
  protected:
   void onInit() override;
@@ -38,7 +39,7 @@ class DriverNodelet : public nodelet::Nodelet {
   ros::Publisher &get_points_publisher(uint64_t sensor_serial_number);
 
   void publish_sensor_information(
-      const CeptonSensorInformation &sensor_information);
+      const cepton_sdk::SensorInformation &sensor_information);
 
   void publish_image_points(uint64_t sensor_serial_number,
                             uint64_t message_timestamp);
@@ -58,7 +59,7 @@ class DriverNodelet : public nodelet::Nodelet {
   std::map<uint64_t, ros::Publisher> image_points_publishers;
   std::map<uint64_t, ros::Publisher> points_publishers;
 
-  std::vector<CeptonSensorImagePoint> image_points;
+  std::vector<cepton_sdk::SensorImagePoint> image_points;
   std::vector<cepton_sdk::SensorPoint> points;
 };
 }  // namespace cepton_ros
