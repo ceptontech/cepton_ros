@@ -12,8 +12,6 @@
 
 #include <array>
 #include <chrono>
-#include <map>
-#include <thread>
 
 namespace cepton_sdk {
 

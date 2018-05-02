@@ -9,11 +9,11 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "cepton_export.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#include "cepton_export.h"
 
 #define CEPTON_SDK_VERSION 10
 
@@ -165,7 +165,7 @@ enum _CeptonSDKFrameMode {
   CEPTON_SDK_FRAME_STREAMING = 0,
   /// Report points at fixed time intervals.
   /**
-   * Interval controlled by `frame_length`.
+   * Interval controlled by `CeptonSDKFrameOptions::frame_length`.
    */
   CEPTON_SDK_FRAME_TIMED = 1,
   /// Report points when the field of view is covered once.
