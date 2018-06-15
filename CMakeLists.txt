@@ -50,6 +50,7 @@ generate_messages(
   DEPENDENCIES
   std_msgs
 )
+
 set(CEPTON_ROS_SOURCES
   src/driver_nodelet.cpp
 )
@@ -58,7 +59,7 @@ target_link_libraries(cepton_ros
   ${catkin_LIBRARIES}
   ${CEPTON_SDK_LIBRARIES}
 )
-
+add_dependencies(cepton_ros cepton_ros_generate_messages_cpp)
 set(CEPTON_ROS_LIBRARIES
   cepton_ros
 )
