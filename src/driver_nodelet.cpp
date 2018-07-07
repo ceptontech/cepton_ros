@@ -60,11 +60,10 @@ void DriverNodelet::onInit() {
   // Initialize sdk
   cepton_sdk::SensorErrorCode error_code;
 
-  const int ver = 11;
   auto options = cepton_sdk::create_options();
   options.control_flags = control_flags;
   options.frame.mode = CEPTON_SDK_FRAME_CYCLE;
-  error_code = cepton_sdk::initialize(ver, options, global_on_error, this);
+  error_code = cepton_sdk::initialize(13, options, global_on_error, this);
   if (error_code) {
     NODELET_FATAL("cepton_sdk::initialize failed: %s",
                   cepton_sdk::get_error_code_name(error_code));
