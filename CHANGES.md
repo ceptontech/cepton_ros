@@ -1,5 +1,8 @@
 # Cepton ROS Release Notes
 
+## Version 1.2 (2018-06-09)
+* Migrated to SDK v1.2.
+
 ## Version 1.0 (2018-04-02)
 * Migrated to SDK v1.0.
 * Using SDK C++ interface.
