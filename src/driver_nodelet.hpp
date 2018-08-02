@@ -60,6 +60,6 @@ class DriverNodelet : public nodelet::Nodelet {
   std::map<uint64_t, ros::Publisher> points_publishers;
 
   std::vector<cepton_sdk::SensorImagePoint> image_points;
-  std::vector<cepton_sdk::SensorPoint> points;
+  std::vector<cepton_sdk::util::SensorPoint> points;
 };
 }  // namespace cepton_ros

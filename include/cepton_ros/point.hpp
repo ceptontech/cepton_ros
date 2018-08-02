@@ -12,11 +12,21 @@ namespace cepton_ros {
 struct CeptonImagePoint {
   double timestamp;
   float image_x;
-  float image_z;
   float distance;
+  float image_z;
   float intensity;
-  uint8_t return_number;
-  uint8_t valid;
+  CeptonSensorReturnType return_type;
+#ifdef SIMPLE
+  uint8_t flags;
+#else
+  union {
+    uint8_t flags;
+    struct {
+      uint8_t valid : 1;
+      uint8_t saturated : 1;
+    };
+  };
+#endif
 
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 };
@@ -27,8 +37,18 @@ struct CeptonPoint {
   float y;
   float z;
   float intensity;
-  uint8_t return_number;
-  uint8_t valid;
+  CeptonSensorReturnType return_type;
+#ifdef SIMPLE
+  uint8_t flags;
+#else
+  union {
+    uint8_t flags;
+    struct {
+      uint8_t valid : 1;
+      uint8_t saturated : 1;
+    };
+  };
+#endif
 
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 };
@@ -41,11 +61,11 @@ using CeptonPointCloud = pcl::PointCloud<CeptonPoint>;
 POINT_CLOUD_REGISTER_POINT_STRUCT(cepton_ros::CeptonImagePoint,
     (double, timestamp, timestamp)
     (float, image_x, image_x)
-    (float, image_z, image_z)
     (float, distance, distance)
+    (float, image_z, image_z)
     (float, intensity, intensity)
-    (uint8_t, return_number, return_number)
-    (uint8_t, valid, valid)
+    (CeptonSensorReturnType, return_type, return_type)
+    (uint8_t, flags, flags)
   )
 POINT_CLOUD_REGISTER_POINT_STRUCT(cepton_ros::CeptonPoint,
     (double, timestamp, timestamp)
@@ -53,7 +73,7 @@ POINT_CLOUD_REGISTER_POINT_STRUCT(cepton_ros::CeptonPoint,
     (float, y, y)
     (float, z, z)
     (float, intensity, intensity)
-    (uint8_t, return_number, return_number)
-    (uint8_t, valid, valid)
+    (CeptonSensorReturnType, return_type, return_type)
+    (uint8_t, flags, flags)
   )
 // clang-format on

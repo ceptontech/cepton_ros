@@ -63,7 +63,8 @@ void DriverNodelet::onInit() {
   auto options = cepton_sdk::create_options();
   options.control_flags = control_flags;
   options.frame.mode = CEPTON_SDK_FRAME_CYCLE;
-  error_code = cepton_sdk::initialize(13, options, global_on_error, this);
+  error_code = cepton_sdk::initialize(CEPTON_SDK_VERSION, options,
+                                      global_on_error, this);
   if (error_code) {
     NODELET_FATAL("cepton_sdk::initialize failed: %s",
                   cepton_sdk::get_error_code_name(error_code));
@@ -228,8 +229,9 @@ void DriverNodelet::publish_image_points(uint64_t sensor_serial_number,
     pcl_image_point.distance = cepton_image_point.distance;
     pcl_image_point.image_z = cepton_image_point.image_z;
     pcl_image_point.intensity = cepton_image_point.intensity;
-    pcl_image_point.return_number = cepton_image_point.return_number;
+    pcl_image_point.return_type = cepton_image_point.return_type;
     pcl_image_point.valid = cepton_image_point.valid;
+    pcl_image_point.saturated = cepton_image_point.saturated;
   }
 
   get_image_points_publisher(sensor_serial_number)
@@ -244,8 +246,8 @@ void DriverNodelet::publish_points(uint64_t sensor_serial_number,
   std::size_t i_point = 0;
   for (const auto &image_point : image_points) {
     if (image_point.distance == 0.0f) continue;
-    cepton_sdk::convert_sensor_image_point_to_point(image_point,
-                                                    points[i_point]);
+    cepton_sdk::util::convert_sensor_image_point_to_point(image_point,
+                                                          points[i_point]);
     ++i_point;
   }
   points.resize(i_point);
@@ -265,8 +267,9 @@ void DriverNodelet::publish_points(uint64_t sensor_serial_number,
     pcl_point.y = cepton_point.y;
     pcl_point.z = cepton_point.z;
     pcl_point.intensity = cepton_point.intensity;
-    pcl_point.return_number = cepton_point.return_number;
+    pcl_point.return_type = cepton_point.return_type;
     pcl_point.valid = cepton_point.valid;
+    pcl_point.saturated = cepton_point.saturated;
   }
 
   get_points_publisher(sensor_serial_number).publish(point_cloud_ptr);

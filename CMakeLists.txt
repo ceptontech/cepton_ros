@@ -9,6 +9,14 @@ add_definitions(-std=c++11)
 execute_process(COMMAND uname -m OUTPUT_VARIABLE MACHINE_ARCH OUTPUT_STRIP_TRAILING_WHITESPACE)
 set(OS_NAME "linux-${MACHINE_ARCH}")
 
+# Variables
+set(CEPTON_ROS_VERSION_MAJOR 1)
+set(CEPTON_ROS_VERSION_MINOR 4)
+set(CEPTON_ROS_VERSION_STRING "${CEPTON_ROS_VERSION_MAJOR}.${CEPTON_ROS_VERSION_MINOR}")
+add_definitions(-DCEPTON_ROS_VERSION_MAJOR=${CEPTON_ROS_VERSION_MAJOR})
+add_definitions(-DCEPTON_ROS_VERSION_MINOR=${CEPTON_ROS_VERSION_MINOR})
+add_definitions(-DCEPTON_ROS_VERSION_STRING="${CEPTON_ROS_VERSION_STRING}")
+
 # ------------------------------------------------------------------------------
 # External libraries
 # ------------------------------------------------------------------------------
