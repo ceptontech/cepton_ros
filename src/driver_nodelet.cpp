@@ -28,6 +28,12 @@ static void global_on_image_points(
   ((DriverNodelet *)instance)->on_image_points(handle, n_points, image_points);
 }
 
+void on_timer(const ros::TimerEvent &) {
+  if (cepton_sdk::capture_replay::is_open() &&
+      cepton_sdk::capture_replay::is_end())
+    ros::shutdown();
+}
+
 void DriverNodelet::onInit() {
   this->node_handle = getNodeHandle();
   this->private_node_handle = getPrivateNodeHandle();
@@ -59,8 +65,8 @@ void DriverNodelet::onInit() {
   auto options = cepton_sdk::create_options();
   options.control_flags = control_flags;
   options.frame.mode = CEPTON_SDK_FRAME_CYCLE;
-  auto error = cepton_sdk::initialize(CEPTON_SDK_VERSION, options, global_on_error,
-                                 this);
+  auto error = cepton_sdk::initialize(CEPTON_SDK_VERSION, options,
+                                      global_on_error, this);
   if (error) {
     NODELET_FATAL("cepton_sdk::initialize failed: %s", error.what());
     return;
@@ -81,13 +87,6 @@ void DriverNodelet::onInit() {
       return;
     }
 
-    error = cepton_sdk::capture_replay::set_enable_loop(true);
-    if (error) {
-      NODELET_FATAL("cepton_sdk::capture_replay::set_enable_loop failed: %s",
-                    error.what());
-      return;
-    }
-
     error = cepton_sdk::capture_replay::resume();
     if (error) {
       NODELET_FATAL("cepton_sdk::capture_replay::resume failed: %s",
@@ -95,6 +94,8 @@ void DriverNodelet::onInit() {
       return;
     }
   }
+
+  timer = this->node_handle.createTimer(ros::Duration(1.0), on_timer, false);
 }
 
 std::string DriverNodelet::get_image_points_topic_id(

@@ -53,6 +53,7 @@ class DriverNodelet : public nodelet::Nodelet {
   bool combine_sensors = false;
   std::string output_namespace = "cepton";
 
+  ros::Timer timer;
   ros::Publisher sensor_information_publisher;
   ros::Publisher combined_image_points_publisher;
   ros::Publisher combined_points_publisher;
