@@ -12,22 +12,20 @@ namespace cepton_ros {
 
 DriverNodelet::~DriverNodelet() { cepton_sdk_deinitialize(); }
 
-static void global_on_error(cepton_sdk::SensorHandle sensor_handle,
+static void global_on_error(cepton_sdk::SensorHandle handle,
                             cepton_sdk::SensorErrorCode error_code,
                             const char *const error_msg,
                             const void *const error_data,
                             size_t error_data_size, void *instance) {
   ((DriverNodelet *)instance)
-      ->on_error(sensor_handle, error_code, error_msg, error_data,
-                 error_data_size);
+      ->on_error(handle, error_code, error_msg, error_data, error_data_size);
 }
 
 static void global_on_image_points(
-    cepton_sdk::SensorHandle sensor_handle, std::size_t n_points,
+    cepton_sdk::SensorHandle handle, std::size_t n_points,
     const cepton_sdk::SensorImagePoint *const image_points,
     void *const instance) {
-  ((DriverNodelet *)instance)
-      ->on_image_points(sensor_handle, n_points, image_points);
+  ((DriverNodelet *)instance)->on_image_points(handle, n_points, image_points);
 }
 
 void DriverNodelet::onInit() {
@@ -58,47 +56,42 @@ void DriverNodelet::onInit() {
   }
 
   // Initialize sdk
-  cepton_sdk::SensorErrorCode error_code;
-
   auto options = cepton_sdk::create_options();
   options.control_flags = control_flags;
   options.frame.mode = CEPTON_SDK_FRAME_CYCLE;
-  error_code = cepton_sdk::initialize(CEPTON_SDK_VERSION, options,
-                                      global_on_error, this);
-  if (error_code) {
-    NODELET_FATAL("cepton_sdk::initialize failed: %s",
-                  cepton_sdk::get_error_code_name(error_code));
+  auto error = cepton_sdk::initialize(CEPTON_SDK_VERSION, options, global_on_error,
+                                 this);
+  if (error) {
+    NODELET_FATAL("cepton_sdk::initialize failed: %s", error.what());
     return;
   }
 
   // Listen
-  error_code = cepton_sdk::listen_image_frames(global_on_image_points, this);
-  if (error_code) {
-    NODELET_FATAL("cepton_sdk_listen_image_frames failed: %s",
-                  cepton_sdk::get_error_code_name(error_code));
+  error = cepton_sdk::listen_image_frames(global_on_image_points, this);
+  if (error) {
+    NODELET_FATAL("cepton_sdk_listen_image_frames failed: %s", error.what());
     return;
   }
 
   // Start capture
   if (!capture_path.empty()) {
-    error_code = cepton_sdk::capture_replay::open(capture_path.c_str());
-    if (error_code) {
-      NODELET_FATAL("cepton_sdk_capture_replay_open failed: %s",
-                    cepton_sdk::get_error_code_name(error_code));
+    error = cepton_sdk::capture_replay::open(capture_path.c_str());
+    if (error) {
+      NODELET_FATAL("cepton_sdk_capture_replay_open failed: %s", error.what());
       return;
     }
 
-    error_code = cepton_sdk::capture_replay::set_enable_loop(true);
-    if (error_code) {
+    error = cepton_sdk::capture_replay::set_enable_loop(true);
+    if (error) {
       NODELET_FATAL("cepton_sdk::capture_replay::set_enable_loop failed: %s",
-                    cepton_sdk::get_error_code_name(error_code));
+                    error.what());
       return;
     }
 
-    error_code = cepton_sdk::capture_replay::resume();
-    if (error_code) {
+    error = cepton_sdk::capture_replay::resume();
+    if (error) {
       NODELET_FATAL("cepton_sdk::capture_replay::resume failed: %s",
-                    cepton_sdk::get_error_code_name(error_code));
+                    error.what());
       return;
     }
   }
@@ -160,8 +153,8 @@ ros::Publisher &DriverNodelet::get_points_publisher(
   }
 }
 
-void DriverNodelet::on_error(cepton_sdk::SensorHandle sensor_handle,
-                             int error_code, const char *const error_msg,
+void DriverNodelet::on_error(cepton_sdk::SensorHandle handle, int error_code,
+                             const char *const error_msg,
                              const void *const error_data,
                              size_t error_data_size) {
   NODELET_WARN("%s: %s", cepton_sdk::get_error_code_name(error_code),
@@ -170,16 +163,15 @@ void DriverNodelet::on_error(cepton_sdk::SensorHandle sensor_handle,
 }
 
 void DriverNodelet::on_image_points(
-    cepton_sdk::SensorHandle sensor_handle, std::size_t n_points,
+    cepton_sdk::SensorHandle handle, std::size_t n_points,
     const cepton_sdk::SensorImagePoint *const p_image_points) {
-  int error_code;
+  cepton_sdk::SensorError error;
 
   // Get sensor info
   cepton_sdk::SensorInformation sensor_info;
-  error_code = cepton_sdk::get_sensor_information(sensor_handle, sensor_info);
-  if (error_code) {
-    NODELET_WARN("cepton_sdk::get_sensor_information failed: %s",
-                 cepton_sdk::get_error_code_name(error_code));
+  error = cepton_sdk::get_sensor_information(handle, sensor_info);
+  if (error) {
+    NODELET_WARN("cepton_sdk::get_sensor_information failed: %s", error.what());
     return;
   }
 
