@@ -29,6 +29,7 @@ static void global_on_image_points(
 }
 
 void on_timer(const ros::TimerEvent &) {
+  // If capture replay done, kill.
   if (cepton_sdk::capture_replay::is_open() &&
       cepton_sdk::capture_replay::is_end())
     ros::shutdown();
@@ -49,7 +50,7 @@ void DriverNodelet::onInit() {
                             output_namespace);
 
   const std::string sensor_information_topic_id =
-      output_namespace + "_sensor_information";
+      output_namespace + "/sensor_information";
   sensor_information_publisher =
       node_handle.advertise<SensorInformation>(sensor_information_topic_id, 2);
 
@@ -101,9 +102,9 @@ void DriverNodelet::onInit() {
 std::string DriverNodelet::get_image_points_topic_id(
     uint64_t sensor_serial_number) const {
   if (combine_sensors) {
-    return (output_namespace + "_image_points");
+    return (output_namespace + "/image_points");
   } else {
-    return (output_namespace + "_image_points_" +
+    return (output_namespace + "/image_points/" +
             std::to_string(sensor_serial_number));
   }
 }
@@ -111,9 +112,9 @@ std::string DriverNodelet::get_image_points_topic_id(
 std::string DriverNodelet::get_points_topic_id(
     uint64_t sensor_serial_number) const {
   if (combine_sensors) {
-    return (output_namespace + "_points");
+    return (output_namespace + "/points");
   } else {
-    return (output_namespace + "_points_" +
+    return (output_namespace + "/points/" +
             std::to_string(sensor_serial_number));
   }
 }

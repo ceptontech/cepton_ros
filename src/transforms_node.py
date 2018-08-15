@@ -23,21 +23,12 @@ class TransformsNode(object):
             with open(file_path, "r") as transforms_file:
                 self.transforms_dict = json.load(transforms_file)
 
-    def get_sensor_frame_id(self, sensor_name):
-        return "{}_{}".format(self.ros_namespace, sensor_name)
-
     def publish_transforms(self):
-        for sensor_name, transform in self.transforms_dict.items():
-            if "translation" in transform:
-                translation = transform["translation"]
-            else:
-                translation = numpy.zeros(3)
-            if "rotation" in transform:
-                rotation = transform["rotation"]
-            else:
-                rotation = numpy.array([0.0, 0.0, 0.0, 1.0])
-
-            frame_id = self.get_sensor_frame_id(sensor_name)
+        for serial_number, transform_dict in self.transforms_dict.items():
+            translation = transform_dict.get("translation", numpy.zeros(3))
+            rotation = transform_dict.get(
+                "rotation", numpy.array([0.0, 0.0, 0.0, 1.0]))
+            frame_id = "{}_{}".format(self.ros_namespace, serial_number)
             self.transform_broadcaster.sendTransform(
                 translation, rotation, rospy.Time.now(), frame_id, self.parent_frame_id)
 
