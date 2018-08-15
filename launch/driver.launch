@@ -6,11 +6,11 @@
   <arg name="output_namespace" default="cepton" doc="prefix for names"/>
 
   <!-- launch nodelet manager -->
-  <arg name="manager_node_name" value="$(anon cepton_manager)"/>
+  <arg name="manager_node_name" value="cepton_manager"/>
   <node pkg="nodelet" type="nodelet" name="$(arg manager_node_name)" args="manager" output="screen"/>
 
   <!-- launch driver -->
-  <arg name="driver_node_name" value="$(anon cepton_driver)"/>
+  <arg name="driver_node_name" value="cepton_driver"/>
   <node pkg="nodelet" type="nodelet" name="$(arg driver_node_name)" args="load cepton_ros/DriverNodelet $(arg manager_node_name)" output="screen" required="true">
     <param name="capture_path" value="$(arg capture_path)"/>
     <param name="combine_sensors" value="$(arg combine_sensors)"/>
