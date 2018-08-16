@@ -10,7 +10,7 @@ namespace cepton_ros {
 // http://pointclouds.org/documentation/tutorials/adding_custom_ptype.php
 
 struct CeptonImagePoint {
-  double timestamp;
+  int64_t timestamp;
   float image_x;
   float distance;
   float image_z;
@@ -32,7 +32,7 @@ struct CeptonImagePoint {
 };
 
 struct CeptonPoint {
-  double timestamp;
+  int64_t timestamp;
   float x;
   float y;
   float z;

@@ -28,13 +28,6 @@ static void global_on_image_points(
   ((DriverNodelet *)instance)->on_image_points(handle, n_points, image_points);
 }
 
-void on_timer(const ros::TimerEvent &) {
-  // If capture replay done, kill.
-  if (cepton_sdk::capture_replay::is_open() &&
-      cepton_sdk::capture_replay::is_end())
-    ros::shutdown();
-}
-
 void DriverNodelet::onInit() {
   this->node_handle = getNodeHandle();
   this->private_node_handle = getPrivateNodeHandle();
@@ -95,8 +88,6 @@ void DriverNodelet::onInit() {
       return;
     }
   }
-
-  timer = this->node_handle.createTimer(ros::Duration(1.0), on_timer, false);
 }
 
 std::string DriverNodelet::get_image_points_topic_id(
