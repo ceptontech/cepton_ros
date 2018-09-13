@@ -2,12 +2,10 @@
 <package>
     <name>cepton_ros</name>
     <version>0.1.0</version>
-    <description>ROS package for Cepton LIDAR.</description>
-    <license>MIT</license>
-    <url type="website">http://wiki.ros.org/cepton</url>
+    <description>Cepton LiDAR SDK.</description>
+    <license>None</license>
     <url type="repository">https://github.com/ceptontech/cepton_ros.git</url>
     <maintainer email="jon.allen@ceptontech.com">Jonathan Allen</maintainer>
-    <author email="jon.allen@ceptontech.com">Jonathan Allen</author>
 
     <buildtool_depend>catkin</buildtool_depend>
 
