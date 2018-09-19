@@ -1,5 +1,4 @@
 <launch>
-
   <arg name="data_path" value="$(find cepton_ros)/tests/multi"/>
 
   <!-- Launch driver -->

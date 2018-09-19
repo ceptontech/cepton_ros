@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 
+from __future__ import (absolute_import, division, generators, nested_scopes,
+                        print_function, unicode_literals, with_statement)
+
 import json
 
 import numpy
@@ -18,10 +21,9 @@ class TransformsNode(object):
         self.parent_frame_id = rospy.get_param("~parent_frame_id", "world")
 
         self.transforms_dict = {}
-        file_path = rospy.get_param("~file_path", "")
-        if file_path:
-            with open(file_path, "r") as transforms_file:
-                self.transforms_dict = json.load(transforms_file)
+        transforms_path = rospy.get_param("~transforms_path", "")
+        with open(transforms_path, "r") as f:
+            self.transforms_dict = json.load(f)
         self.transforms_dict = {
             int(key): value for key, value in self.transforms_dict.items()}
 

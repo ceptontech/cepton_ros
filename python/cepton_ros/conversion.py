@@ -3,22 +3,21 @@ from __future__ import (absolute_import, division, generators, nested_scopes,
 
 import numpy
 
+import cepton_sdk
 import geometry_msgs.msg
 import rospy
 import sensor_msgs.msg
 import sensor_msgs.point_cloud2
 
-import cepton_sdk
 
-
-def get_point_field_dtype(field, is_bigendian):
+def _get_point_field_dtype(field, is_bigendian):
     fmt, _ = sensor_msgs.point_cloud2._DATATYPES[field.datatype]
     byteorder = ">" if is_bigendian else "<"
     fmt = byteorder + fmt
     return numpy.dtype(fmt)
 
 
-def get_point_step(fields):
+def _get_point_step(fields):
     point_step = 0
     for field in fields:
         _, itemsize = sensor_msgs.point_cloud2._DATATYPES[field.datatype]
@@ -35,7 +34,7 @@ def unpack_point_cloud_2(cloud):
     data_bytes = data_bytes.reshape([n_points, cloud.point_step])
     data = {}
     for field in cloud.fields:
-        dtype = get_point_field_dtype(field, is_bigendian=cloud.is_bigendian)
+        dtype = _get_point_field_dtype(field, is_bigendian=cloud.is_bigendian)
         field_size = field.count * dtype.itemsize
 
         data_bytes_tmp = \
@@ -48,14 +47,14 @@ def unpack_point_cloud_2(cloud):
 
 def pack_point_cloud_2(header, fields, data):
     n_points = len(list(data.values())[0])
-    point_step = get_point_step(fields)
+    point_step = _get_point_step(fields)
 
     data_bytes = numpy.zeros([n_points, point_step], dtype=numpy.uint8)
     for field in fields:
         if field.name not in data:
             continue
 
-        dtype = get_point_field_dtype(field, is_bigendian=False)
+        dtype = _get_point_field_dtype(field, is_bigendian=False)
         field_size = field.count * dtype.itemsize
 
         data_tmp = data[field.name].astype(dtype)
