@@ -1,6 +1,6 @@
 /** Define macros.
  */
-#ifdef CEPTON_SDK_COMPILING
+#ifdef CEPTON_SDK_COMPILING // Export
 
 #ifdef _MSC_VER
 #define EXPORT __declspec(dllexport)
@@ -10,11 +10,11 @@
 #define EXPORT
 #endif
 
-#elif defined(CEPTON_SDK_INLINED)
+#elif defined(CEPTON_SDK_STATIC) // Import static
 
 #define EXPORT
 
-#else // Import from dll
+#else // Import shared
 
 #ifdef _MSC_VER
 #define EXPORT __declspec(dllimport)
