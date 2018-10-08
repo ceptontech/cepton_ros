@@ -1,5 +1,8 @@
 # Cepton ROS Release Notes
 
+## Version 1.8 2018-10-08
+* Updated SDK.
+
 ## Version 1.7 2018-10-02
 * Updated sdk.
 
