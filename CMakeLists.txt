@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.3)
+cmake_minimum_required(VERSION 2.8)
 project(cepton_ros)
 
 add_definitions(-std=c++11)
@@ -11,7 +11,7 @@ set(OS_NAME "linux-${MACHINE_ARCH}")
 
 # Variables
 set(CEPTON_ROS_VERSION_MAJOR 1)
-set(CEPTON_ROS_VERSION_MINOR 5)
+set(CEPTON_ROS_VERSION_MINOR 8)
 set(CEPTON_ROS_VERSION_STRING "${CEPTON_ROS_VERSION_MAJOR}.${CEPTON_ROS_VERSION_MINOR}")
 add_definitions(-DCEPTON_ROS_VERSION_MAJOR=${CEPTON_ROS_VERSION_MAJOR})
 add_definitions(-DCEPTON_ROS_VERSION_MINOR=${CEPTON_ROS_VERSION_MINOR})
