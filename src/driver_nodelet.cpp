@@ -66,18 +66,25 @@ void DriverNodelet::onInit() {
     return;
   }
 
-  // Listen
-  error = cepton_sdk::listen_image_frames(global_on_image_points, this);
-  if (error) {
-    NODELET_FATAL("cepton_sdk_listen_image_frames failed: %s", error.what());
-    return;
-  }
-
   // Start capture
   if (!capture_path.empty()) {
     error = cepton_sdk::capture_replay::open(capture_path.c_str());
     if (error) {
-      NODELET_FATAL("cepton_sdk_capture_replay_open failed: %s", error.what());
+      NODELET_FATAL("cepton_sdk_capture_replay::open failed: %s", error.what());
+      return;
+    }
+
+    error = cepton_sdk::capture_replay::resume_blocking(10.0f);
+    if (error) {
+      NODELET_FATAL("cepton_sdk::capture::resume_blocking failed: %s",
+                    error.what());
+      return;
+    }
+
+    error = cepton_sdk::capture_replay::seek(0.0f);
+    if (error) {
+      NODELET_FATAL("cepton_sdk::capture_replay::seek failed: %s",
+                    error.what());
       return;
     }
 
@@ -87,6 +94,13 @@ void DriverNodelet::onInit() {
                     error.what());
       return;
     }
+  }
+
+  // Listen
+  error = cepton_sdk::listen_image_frames(global_on_image_points, this);
+  if (error) {
+    NODELET_FATAL("cepton_sdk_listen_image_frames failed: %s", error.what());
+    return;
   }
 }
 
