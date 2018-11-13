@@ -2,6 +2,7 @@
 
 ## Version 1.9 2018-11-02
 * Update sdk.
+* Combine image and 3d point cloud outputs.
 
 ## Version 1.8 2018-10-08
 * Updated SDK.

@@ -193,7 +193,6 @@ void DriverNodelet::on_image_points(
 
   // Publish points
   uint64_t message_timestamp = pcl_conversions::toPCL(ros::Time::now());
-  publish_image_points(sensor_info.serial_number, message_timestamp);
   publish_points(sensor_info.serial_number, message_timestamp);
   image_points.clear();
   points.clear();
@@ -208,33 +207,6 @@ void DriverNodelet::publish_sensor_information(
   msg.model = sensor_information.model;
   msg.firmware_version = sensor_information.firmware_version;
   sensor_information_publisher.publish(msg);
-}
-
-void DriverNodelet::publish_image_points(uint64_t sensor_serial_number,
-                                         uint64_t message_timestamp) {
-  CeptonImagePointCloud::Ptr image_point_cloud_ptr(new CeptonImagePointCloud());
-  image_point_cloud_ptr->header.stamp = message_timestamp;
-  image_point_cloud_ptr->header.frame_id = get_frame_id(sensor_serial_number);
-  image_point_cloud_ptr->height = 1;
-  image_point_cloud_ptr->width = image_points.size();
-
-  image_point_cloud_ptr->resize(image_points.size());
-  for (std::size_t i_image_point = 0; i_image_point < image_points.size();
-       ++i_image_point) {
-    const auto &cepton_image_point = image_points[i_image_point];
-    auto &pcl_image_point = image_point_cloud_ptr->points[i_image_point];
-    pcl_image_point.timestamp = cepton_image_point.timestamp;
-    pcl_image_point.image_x = cepton_image_point.image_x;
-    pcl_image_point.distance = cepton_image_point.distance;
-    pcl_image_point.image_z = cepton_image_point.image_z;
-    pcl_image_point.intensity = cepton_image_point.intensity;
-    pcl_image_point.return_type = cepton_image_point.return_type;
-    pcl_image_point.valid = cepton_image_point.valid;
-    pcl_image_point.saturated = cepton_image_point.saturated;
-  }
-
-  get_image_points_publisher(sensor_serial_number)
-      .publish(image_point_cloud_ptr);
 }
 
 void DriverNodelet::publish_points(uint64_t sensor_serial_number,
@@ -262,6 +234,9 @@ void DriverNodelet::publish_points(uint64_t sensor_serial_number,
     const auto &cepton_point = points[i_point];
     auto &pcl_point = point_cloud_ptr->points[i_point];
     pcl_point.timestamp = cepton_point.timestamp;
+    pcl_point.image_x = cepton_point.image_x;
+    pcl_point.image_z = cepton_point.image_z;
+    pcl_point.distance = cepton_point.distance;
     pcl_point.x = cepton_point.x;
     pcl_point.y = cepton_point.y;
     pcl_point.z = cepton_point.z;
