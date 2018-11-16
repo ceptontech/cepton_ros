@@ -10,4 +10,10 @@
     <arg name="control_flags" value="$(arg control_flags)"/>
     <arg name="output_namespace" value="$(arg output_namespace)"/>
   </include>
+
+  <!-- Launch identity transform -->
+  <include file="$(find cepton_ros)/launch/identity_transform.launch">
+    <arg name="frame_id" value="cepton"/>
+    <arg name="parent_frame_id" value="world"/>
+  </include>
 </launch>
