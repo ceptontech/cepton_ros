@@ -19,7 +19,7 @@ Change to the catkin workspace directory.
 Clone the repository.
 
 ```sh
-$ git clone --recursive git@github.com:ceptontech/cepton_ros.git src/cepton_ros
+$ git clone --recursive https://github.com/ceptontech/cepton_ros.git src/cepton_ros
 ```
 
 Run catkin make.
