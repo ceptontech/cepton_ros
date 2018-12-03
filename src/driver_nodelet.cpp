@@ -56,6 +56,7 @@ void DriverNodelet::onInit() {
   }
 
   // Initialize sdk
+  NODELET_INFO("cepton_sdk version: %s", cepton_sdk::get_version_string());
   auto options = cepton_sdk::create_options();
   options.control_flags = control_flags;
   options.frame.mode = CEPTON_SDK_FRAME_CYCLE;
