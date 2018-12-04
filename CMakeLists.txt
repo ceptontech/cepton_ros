@@ -9,14 +9,6 @@ add_definitions(-std=c++11)
 execute_process(COMMAND uname -m OUTPUT_VARIABLE MACHINE_ARCH OUTPUT_STRIP_TRAILING_WHITESPACE)
 set(OS_NAME "linux-${MACHINE_ARCH}")
 
-# Variables
-set(CEPTON_ROS_VERSION_MAJOR 1)
-set(CEPTON_ROS_VERSION_MINOR 8)
-set(CEPTON_ROS_VERSION_STRING "${CEPTON_ROS_VERSION_MAJOR}.${CEPTON_ROS_VERSION_MINOR}")
-add_definitions(-DCEPTON_ROS_VERSION_MAJOR=${CEPTON_ROS_VERSION_MAJOR})
-add_definitions(-DCEPTON_ROS_VERSION_MINOR=${CEPTON_ROS_VERSION_MINOR})
-add_definitions(-DCEPTON_ROS_VERSION_STRING="${CEPTON_ROS_VERSION_STRING}")
-
 # ------------------------------------------------------------------------------
 # External libraries
 # ------------------------------------------------------------------------------
@@ -36,7 +28,7 @@ set(CEPTON_CATKIN_DEPENDS
 find_package(catkin REQUIRED COMPONENTS ${CEPTON_CATKIN_DEPENDS})
 include_directories(SYSTEM ${catkin_INCLUDE_DIRS})
 
-# Cepton SDK
+# cepton_sdk
 set(CEPTON_SDK_DIR "${PROJECT_SOURCE_DIR}/third_party/cepton_sdk")
 include_directories(SYSTEM "${CEPTON_SDK_DIR}/include")
 set(CEPTON_SDK_LIBRARIES "${CEPTON_SDK_DIR}/lib/${OS_NAME}/libcepton_sdk.a")
@@ -47,9 +39,8 @@ set(CEPTON_ROS_EXTERNAL_LIBRARIES
 # ------------------------------------------------------------------------------
 # Targets
 # ------------------------------------------------------------------------------
-include_directories(include)
+include_directories("${PROJECT_SOURCE_DIR}/include")
 
-# Cepton ROS
 add_message_files(
   FILES
   SensorInformation.msg
