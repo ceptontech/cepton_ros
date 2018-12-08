@@ -1,36 +1,26 @@
 <?xml version="1.0"?>
-<package>
+<package format="2">
     <name>cepton_ros</name>
     <version>0.9.0</version>
     <description>Cepton LiDAR SDK.</description>
     <license>None</license>
     <url type="repository">https://github.com/ceptontech/cepton_ros.git</url>
-    <maintainer email="jon.allen@ceptontech.com">Jonathan Allen</maintainer>
+    <maintainer email="support@cepton.com">Cepton Technologies</maintainer>
 
     <buildtool_depend>catkin</buildtool_depend>
 
-    <build_depend>message_generation</build_depend>
-    <build_depend>nodelet</build_depend>
-    <build_depend>pcl_conversions</build_depend>
-    <build_depend>pcl_ros</build_depend>
-    <build_depend>pluginlib</build_depend>
-    <build_depend>roscpp</build_depend>
-    <build_depend>roslib</build_depend>
-    <build_depend>rospy</build_depend>
-    <build_depend>std_msgs</build_depend>
-    <build_depend>tf</build_depend>
+    <depend>nodelet</depend>
+    <depend>pcl_conversions</depend>
+    <depend>pcl_ros</depend>
+    <depend>pluginlib</depend>
+    <depend>roscpp</depend>
+    <depend>roslib</depend>
+    <depend>rospy</depend>
+    <depend>std_msgs</depend>
+    <depend>tf</depend>
 
-    <run_depend>message_generation</run_depend>
-    <run_depend>message_runtime</run_depend>
-    <run_depend>nodelet</run_depend>
-    <run_depend>pcl_conversions</run_depend>
-    <run_depend>pcl_ros</run_depend>
-    <run_depend>pluginlib</run_depend>
-    <run_depend>roscpp</run_depend>
-    <run_depend>roslib</run_depend>
-    <run_depend>rospy</run_depend>
-    <run_depend>std_msgs</run_depend>
-    <run_depend>tf</run_depend>
+    <build_depend>message_generation</build_depend>
+    <exec_depend>message_runtime</exec_depend>
 
     <export>
         <nodelet plugin="${prefix}/nodelets.xml"/>

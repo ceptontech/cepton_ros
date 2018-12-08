@@ -9,8 +9,7 @@
 #include <sensor_msgs/PointCloud2.h>
 #include <tf/transform_broadcaster.h>
 
-#include <cepton_sdk.hpp>
-#include <cepton_sdk_util.hpp>
+#include <cepton_sdk_api.hpp>
 
 #include "cepton_ros/SensorInformation.h"
 #include "cepton_ros/point.hpp"
@@ -21,9 +20,6 @@ class DriverNodelet : public nodelet::Nodelet {
  public:
   ~DriverNodelet();
 
-  void on_error(cepton_sdk::SensorHandle sensor_handle, int error_code,
-                const char *const error_msg, const void *const error_data,
-                size_t error_data_size);
   void on_image_points(
       cepton_sdk::SensorHandle sensor_handle, std::size_t n_points,
       const cepton_sdk::SensorImagePoint *const p_image_points);
@@ -32,17 +28,12 @@ class DriverNodelet : public nodelet::Nodelet {
   void onInit() override;
 
  private:
-  std::string get_image_points_topic_id(uint64_t sensor_serial_number) const;
   std::string get_points_topic_id(uint64_t sensor_serial_number) const;
   std::string get_frame_id(uint64_t sensor_serial_number) const;
-  ros::Publisher &get_image_points_publisher(uint64_t sensor_serial_number);
   ros::Publisher &get_points_publisher(uint64_t sensor_serial_number);
 
   void publish_sensor_information(
       const cepton_sdk::SensorInformation &sensor_information);
-
-  void publish_image_points(uint64_t sensor_serial_number,
-                            uint64_t message_timestamp);
   void publish_points(uint64_t sensor_serial_number,
                       uint64_t message_timestamp);
 
@@ -52,6 +43,9 @@ class DriverNodelet : public nodelet::Nodelet {
 
   bool combine_sensors = false;
   std::string output_namespace = "cepton";
+
+  cepton_sdk::api::SensorErrorCallback error_callback;
+  cepton_sdk::api::SensorImageFrameCallback image_frame_callback;
 
   ros::Timer timer;
   ros::Publisher sensor_information_publisher;
