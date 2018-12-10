@@ -1,10 +1,12 @@
 #include "driver_nodelet.hpp"
 
-#include <cmath>
-#include <cstdint>
-
 #include <pcl_conversions/pcl_conversions.h>
+#include <pcl_ros/point_cloud.h>
 #include <pluginlib/class_list_macros.h>
+#include <sensor_msgs/PointCloud2.h>
+
+#include "cepton_ros/SensorInformation.h"
+#include "cepton_ros/point.hpp"
 
 PLUGINLIB_EXPORT_CLASS(cepton_ros::DriverNodelet, nodelet::Nodelet);
 
@@ -74,7 +76,6 @@ void DriverNodelet::onInit() {
   if (!capture_path.empty()) {
     error = cepton_sdk::api::open_replay(capture_path);
     FATAL_ERROR(error)
-
     error = cepton_sdk::capture_replay::resume();
     FATAL_ERROR(error)
   }
@@ -82,7 +83,6 @@ void DriverNodelet::onInit() {
   // Listen
   error = image_frame_callback.initialize();
   FATAL_ERROR(error);
-
   error = image_frame_callback.listen(this, &DriverNodelet::on_image_points);
   FATAL_ERROR(error)
 }
@@ -113,7 +113,7 @@ ros::Publisher &DriverNodelet::get_points_publisher(
     if (!points_publishers.count(sensor_serial_number)) {
       std::string topic_id = get_points_topic_id(sensor_serial_number);
       points_publishers[sensor_serial_number] =
-          node_handle.advertise<sensor_msgs::PointCloud2>(topic_id, 10);
+          node_handle.advertise<CeptonPointCloud>(topic_id, 1);
     }
     return points_publishers.at(sensor_serial_number);
   }
@@ -170,16 +170,15 @@ void DriverNodelet::publish_points(uint64_t sensor_serial_number,
   }
   points.resize(i_point);
 
-  CeptonPointCloud::Ptr point_cloud_ptr(new CeptonPointCloud());
-  point_cloud_ptr->header.stamp = message_timestamp;
-  point_cloud_ptr->header.frame_id = get_frame_id(sensor_serial_number);
-  point_cloud_ptr->height = 1;
-  point_cloud_ptr->width = points.size();
-
-  point_cloud_ptr->resize(points.size());
+  CeptonPointCloud point_cloud;
+  point_cloud.header.stamp = message_timestamp;
+  point_cloud.header.frame_id = get_frame_id(sensor_serial_number);
+  point_cloud.height = 1;
+  point_cloud.width = points.size();
+  point_cloud.resize(points.size());
   for (std::size_t i_point = 0; i_point < points.size(); ++i_point) {
     const auto &cepton_point = points[i_point];
-    auto &pcl_point = point_cloud_ptr->points[i_point];
+    auto &pcl_point = point_cloud.points[i_point];
     pcl_point.timestamp = cepton_point.timestamp;
     pcl_point.image_x = cepton_point.image_x;
     pcl_point.image_z = cepton_point.image_z;
@@ -193,7 +192,7 @@ void DriverNodelet::publish_points(uint64_t sensor_serial_number,
     pcl_point.saturated = cepton_point.saturated;
   }
 
-  get_points_publisher(sensor_serial_number).publish(point_cloud_ptr);
+  get_points_publisher(sensor_serial_number).publish(point_cloud);
 }
 
 }  // namespace cepton_ros
