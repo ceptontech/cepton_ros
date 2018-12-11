@@ -1,5 +1,8 @@
 # Cepton ROS Release Notes
 
+## Version 1.10 2018-12-10
+* Update SDK.
+
 ## Version 1.9 2018-11-02
 * Update sdk.
 * Combine image and 3d point cloud outputs.
