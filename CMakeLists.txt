@@ -31,10 +31,10 @@ find_package(catkin REQUIRED COMPONENTS ${CEPTON_ROS_CATKIN_DEPENDS})
 include_directories(SYSTEM ${catkin_INCLUDE_DIRS})
 
 # cepton_sdk
-set(CEPTON_SDK_DIR "${PROJECT_SOURCE_DIR}/third_party/cepton_sdk")
-include_directories(SYSTEM "${CEPTON_SDK_DIR}/include")
-set(CEPTON_SDK_LIBRARIES "${CEPTON_SDK_DIR}/lib/${OS_NAME}/libcepton_sdk.a")
-list(APPEND CEPTON_ROS_EXTERNAL_LIBRARIES ${CEPTON_SDK_LIBRARIES})
+set(CEPTON_SDK_SOURCE_DIR "${PROJECT_SOURCE_DIR}/third_party/cepton_sdk")
+include_directories(SYSTEM "${CEPTON_SDK_SOURCE_DIR}/include")
+list(APPEND CEPTON_ROS_EXTERNAL_LIBRARIES 
+  "${CEPTON_SDK_SOURCE_DIR}/lib/${OS_NAME}/libcepton_sdk.a")
 
 # ------------------------------------------------------------------------------
 # Targets
@@ -68,36 +68,4 @@ catkin_package(
   DEPENDS
   INCLUDE_DIRS include
   LIBRARIES ${CEPTON_ROS_EXTERNAL_LIBRARIES} ${CEPTON_ROS_LIBRARIES}
-)
-
-# Libraries
-install(TARGETS ${CEPTON_ROS_LIBRARIES}
-  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-)
-
-# Third Party
-install(FILES ${CEPTON_ROS_EXTERNAL_LIBRARIES}
-  DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-)
-
-# Config
-install(DIRECTORY config
-  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
-)
-
-# Headers
-install(DIRECTORY include/cepton_ros/
-  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
-)
-
-# Plugins
-install(FILES nodelets.xml
-  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
-)
-
-# Launch
-install(DIRECTORY launch
-  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 )
