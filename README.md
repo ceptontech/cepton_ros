@@ -19,19 +19,19 @@ Change to the catkin workspace directory.
 Clone the repository.
 
 ```sh
-$ git clone --recursive https://github.com/ceptontech/cepton_ros.git src/cepton_ros
+git clone --recursive https://github.com/ceptontech/cepton_ros.git src/cepton_ros
 ```
 
 Run catkin make.
 
 ```sh
-$ catkin_make
+catkin_make
 ```
 
 Source the catkin setup script.
 
 ```sh
-$ source devel/setup.bash
+source devel/setup.bash
 ```
 
 ## Getting started
@@ -42,7 +42,9 @@ On Ubuntu, it is necessary to assign a static IP address to the host computer's 
 
 First, try viewing the sensor in CeptonViewer, to ensure that it is connected properly. Then, launch the ROS demo (`roscore` must be running already).
 
-    $ roslaunch cepton_ros demo.launch
+```sh
+roslaunch cepton_ros demo.launch
+```
 
 A rviz window should popup showing a sample point cloud.
 
@@ -50,7 +52,9 @@ A rviz window should popup showing a sample point cloud.
 
 Multiple sensors can be viewed using the `driver_multi.launch` file. The driver will publish separate topics and transforms for each sensor.
 
-    $ roslaunch cepton_ros driver_multi.launch transforms_path:=<transforms_file>
+```sh
+roslaunch cepton_ros driver_multi.launch transforms_path:=<transforms_file>
+```
 
 A sample transforms file can be found at `samples/cepton_transforms.json`. The rotation is in quaternion format `<x, y, z, w>`. The coordinate system is as follows: `+x` = right, `+y` = forward, `+z` = up.
 
