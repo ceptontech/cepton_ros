@@ -13,7 +13,7 @@ class C_SensorPoint(Structure):
     ]
 
 
-def point_cloud_2_to_cepton_points(cloud):
+def ros_to_cepton_points(cloud):
     n_points = cloud.width * cloud.height
     c_points = cepton_sdk.common.c.convert_bytes_to_ndarray(
         numpy.fromstring(cloud.data, dtype=numpy.uint8), C_SensorPoint)

@@ -4,7 +4,7 @@
   <arg name="parent_frame_id" default="world" doc="parent transform frame"/>
   <arg name="rate" default="10" doc="output rate"/>
 
-  <node pkg="cepton_ros" type="transforms_node.py" name="$(anon cepton_transforms)" output="screen">
+  <node pkg="cepton_ros" type="transforms_node.py" name="cepton_transforms" output="screen">
     <param name="parent_frame_id" value="$(arg parent_frame_id)"/>
     <param name="rate" value="$(arg rate)"/>
     <param name="transforms_path" value="$(arg transforms_path)"/>

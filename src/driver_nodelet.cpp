@@ -1,11 +1,10 @@
 #include "driver_nodelet.hpp"
 
-#include <pcl_conversions/pcl_conversions.h>
 #include <pcl_ros/point_cloud.h>
 #include <pluginlib/class_list_macros.h>
 #include <sensor_msgs/PointCloud2.h>
 
-#include "cepton_ros/SensorInformationStamped.h"
+#include "cepton_ros/SensorInformation.h"
 
 PLUGINLIB_EXPORT_CLASS(cepton_ros::DriverNodelet, nodelet::Nodelet);
 
@@ -45,7 +44,7 @@ DriverNodelet::~DriverNodelet() { cepton_sdk_deinitialize(); }
 const std::map<std::string, cepton_sdk::FrameMode> frame_mode_lut = {
     {"COVER", CEPTON_SDK_FRAME_COVER},
     {"CYCLE", CEPTON_SDK_FRAME_CYCLE},
-    {"STREAMING", CEPTON_SDK_FRAME_STREAMING},
+    {"STREAMING", CEPTON_SDK_FRAME_TIMED},
 };
 
 void DriverNodelet::onInit() {
@@ -55,6 +54,9 @@ void DriverNodelet::onInit() {
   // Get parameters
   private_node_handle.param("combine_sensors", combine_sensors,
                             combine_sensors);
+
+  bool capture_loop = true;
+  private_node_handle.param("capture_loop", capture_loop, capture_loop);
 
   std::string capture_path = "";
   private_node_handle.param("capture_path", capture_path, capture_path);
@@ -67,8 +69,7 @@ void DriverNodelet::onInit() {
   const cepton_sdk::FrameMode frame_mode = frame_mode_lut.at(frame_mode_str);
 
   sensor_information_publisher =
-      node_handle.advertise<SensorInformationStamped>(
-          "cepton/sensor_information", 2);
+      node_handle.advertise<SensorInformation>("cepton/sensor_information", 2);
   points_publisher =
       node_handle.advertise<sensor_msgs::PointCloud2>("cepton/points", 2);
 
@@ -85,6 +86,7 @@ void DriverNodelet::onInit() {
   auto options = cepton_sdk::create_options();
   options.control_flags = control_flags;
   options.frame.mode = frame_mode;
+  if (frame_mode == CEPTON_SDK_FRAME_TIMED) options.frame.length = 0.01f;
   error = cepton_sdk::initialize(
       CEPTON_SDK_VERSION, options,
       &cepton_sdk::api::SensorErrorCallback::global_on_callback,
@@ -95,7 +97,7 @@ void DriverNodelet::onInit() {
   if (!capture_path.empty()) {
     error = cepton_sdk::api::open_replay(capture_path);
     FATAL_ERROR(error)
-    error = cepton_sdk::capture_replay::set_enable_loop(true);
+    error = cepton_sdk::capture_replay::set_enable_loop(capture_loop);
     FATAL_ERROR(error);
     error = cepton_sdk::capture_replay::resume();
     FATAL_ERROR(error)
@@ -135,16 +137,15 @@ void DriverNodelet::on_image_points(
 
 void DriverNodelet::publish_sensor_information(
     const cepton_sdk::SensorInformation &sensor_information) {
-  cepton_ros::SensorInformationStamped msg;
-  msg.header.stamp = ros::Time::now();
-  msg.info.handle = sensor_information.handle;
-  msg.info.serial_number = sensor_information.serial_number;
-  msg.info.model_name = sensor_information.model_name;
-  msg.info.model = sensor_information.model;
-  msg.info.firmware_version = sensor_information.firmware_version;
+  cepton_ros::SensorInformation msg;
+  msg.handle = sensor_information.handle;
+  msg.serial_number = sensor_information.serial_number;
+  msg.model_name = sensor_information.model_name;
+  msg.model = sensor_information.model;
+  msg.firmware_version = sensor_information.firmware_version;
   const uint8_t *const sensor_information_bytes =
       (const uint8_t *)&sensor_information;
-  msg.info.data = std::vector<uint8_t>(
+  msg.data = std::vector<uint8_t>(
       sensor_information_bytes,
       sensor_information_bytes + sizeof(sensor_information));
   sensor_information_publisher.publish(msg);
