@@ -94,9 +94,9 @@ struct EXPORT CeptonSensorInformation {
   uint16_t reserved;
   char firmware_version[32];
 
-  float last_reported_temperature;        ///< [celsius]
-  float last_reported_humidity;           ///< [%]
-  float last_reported_age;                ///< [hours]
+  float last_reported_temperature;  ///< [celsius]
+  float last_reported_humidity;     ///< [%]
+  float last_reported_age;          ///< [hours]
 
   float measurement_period;  ///< Time between measurements [seconds].
 

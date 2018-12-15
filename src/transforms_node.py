@@ -17,7 +17,6 @@ class TransformsNode(object):
         self.rate = rospy.Rate(rospy.get_param("~rate", 10))
         self.transform_broadcaster = tf.TransformBroadcaster()
 
-        self.ros_namespace = rospy.get_param("~namespace", "cepton")
         self.parent_frame_id = rospy.get_param("~parent_frame_id", "world")
 
         self.transforms_dict = {}
@@ -31,7 +30,7 @@ class TransformsNode(object):
         for serial_number, transform_dict in self.transforms_dict.items():
             translation = transform_dict.get("translation", [0.0, 0.0, 0.0])
             rotation = transform_dict.get("rotation", [0.0, 0.0, 0.0, 1.0])
-            frame_id = "{}_{}".format(self.ros_namespace, serial_number)
+            frame_id = "cepton_{}".format(serial_number)
             self.transform_broadcaster.sendTransform(
                 translation, rotation, rospy.Time.now(), frame_id, self.parent_frame_id)
 

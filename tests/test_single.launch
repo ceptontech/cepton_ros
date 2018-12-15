@@ -1,10 +1,7 @@
 <launch>
-  <arg name="dirname" value="$(find cepton_ros)/tests"/>
-  <arg name="data_path" value="$(arg dirname)/single"/>
+  <arg name="data_path" value="$(find cepton_ros)/tests/single"/>
 
-  <!-- Launch demo -->
   <include file="$(find cepton_ros)/launch/demo.launch">
     <arg name="capture_path" value="$(arg data_path)/lidar.pcap"/>
-    <arg name="rviz_config_path" value="$(arg data_path)/config.rviz"/>
   </include>
 </launch>

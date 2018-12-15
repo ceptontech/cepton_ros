@@ -1,19 +1,26 @@
 <launch>
   <arg name="capture_path" default="" doc="capture file path"/>
-  <arg name="combine_sensors" default="false" doc="if true, single topic and transform frame, otherwise one per sensor"/>
   <arg name="control_flags" default="0" doc="sdk control flags"/>
-  <arg name="output_namespace" default="cepton" doc="prefix for names"/>
+  <arg name="frame_mode" default="CYCLE" doc="sdk frame mode"/>
+  <arg name="parent_frame_id" default="world" doc="parent transform frame"/>
+  <arg name="transforms_path" default="" doc="transforms json file path"/>
 
-  <!-- launch nodelet manager -->
+  <arg name="combine_sensors" value="$(eval transforms_path == '')"/>
+
   <arg name="manager_node_name" value="cepton_manager"/>
   <node pkg="nodelet" type="nodelet" name="$(arg manager_node_name)" args="manager" output="screen"/>
 
-  <!-- launch driver -->
   <arg name="driver_node_name" value="cepton_driver"/>
   <node pkg="nodelet" type="nodelet" name="$(arg driver_node_name)" args="load cepton_ros/DriverNodelet $(arg manager_node_name)" output="screen" required="true">
     <param name="capture_path" value="$(arg capture_path)"/>
     <param name="combine_sensors" value="$(arg combine_sensors)"/>
     <param name="control_flags" value="$(arg control_flags)"/>
-    <param name="output_namespace" value="$(arg output_namespace)"/>
+    <param name="frame_mode" value="$(arg frame_mode)"/>
   </node>
+
+  <include file="$(find cepton_ros)/launch/transforms.launch">
+    <arg name="parent_frame_id" value="$(arg parent_frame_id)"/>
+    <arg name="transforms_path" value="$(find cepton_ros)/launch/settings/cepton_transforms.json" if="$(arg combine_sensors)"/>
+    <arg name="transforms_path" value="$(arg transforms_path)" unless="$(arg combine_sensors)"/>
+  </include>
 </launch>

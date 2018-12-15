@@ -5,12 +5,28 @@
 #include <pluginlib/class_list_macros.h>
 #include <sensor_msgs/PointCloud2.h>
 
-#include "cepton_ros/SensorInformation.h"
-#include "cepton_ros/point.hpp"
+#include "cepton_ros/SensorInformationStamped.h"
 
 PLUGINLIB_EXPORT_CLASS(cepton_ros::DriverNodelet, nodelet::Nodelet);
 
 namespace cepton_ros {
+
+namespace rosutil {
+ros::Time from_usec(int64_t usec) {
+  ros::Time stamp;
+  stamp.sec = double(usec) * 1e-6;
+  usec -= int64_t(double(stamp.sec) * 1e6);
+  stamp.nsec = double(usec) * 1e3f;
+  return stamp;
+}
+
+int64_t to_usec(const ros::Time &stamp) {
+  int64_t usec = 0;
+  usec += double(stamp.sec) * 1e6;
+  usec += double(stamp.nsec) * 1e-3;
+  return usec;
+}
+}  // namespace rosutil
 
 #define FATAL_ERROR(error)       \
   if (error) {                   \
@@ -26,36 +42,39 @@ namespace cepton_ros {
 
 DriverNodelet::~DriverNodelet() { cepton_sdk_deinitialize(); }
 
+const std::map<std::string, cepton_sdk::FrameMode> frame_mode_lut = {
+    {"COVER", CEPTON_SDK_FRAME_COVER},
+    {"CYCLE", CEPTON_SDK_FRAME_CYCLE},
+    {"STREAMING", CEPTON_SDK_FRAME_STREAMING},
+};
+
 void DriverNodelet::onInit() {
   this->node_handle = getNodeHandle();
   this->private_node_handle = getPrivateNodeHandle();
 
   // Get parameters
-  std::string capture_path = "";
-  private_node_handle.param("capture_path", capture_path, capture_path);
   private_node_handle.param("combine_sensors", combine_sensors,
                             combine_sensors);
+
+  std::string capture_path = "";
+  private_node_handle.param("capture_path", capture_path, capture_path);
+
   int control_flags = 0;
   private_node_handle.param("control_flags", control_flags, control_flags);
-  private_node_handle.param("output_namespace", output_namespace,
-                            output_namespace);
 
-  const std::string sensor_information_topic_id =
-      output_namespace + "/sensor_information";
+  std::string frame_mode_str = "CYCLE";
+  private_node_handle.param("frame_mode", frame_mode_str, frame_mode_str);
+  const cepton_sdk::FrameMode frame_mode = frame_mode_lut.at(frame_mode_str);
+
   sensor_information_publisher =
-      node_handle.advertise<SensorInformation>(sensor_information_topic_id, 2);
-
-  if (combine_sensors) {
-    combined_image_points_publisher =
-        node_handle.advertise<sensor_msgs::PointCloud2>(get_points_topic_id(0),
-                                                        2);
-    combined_points_publisher = node_handle.advertise<sensor_msgs::PointCloud2>(
-        get_points_topic_id(0), 2);
-  }
+      node_handle.advertise<SensorInformationStamped>(
+          "cepton/sensor_information", 2);
+  points_publisher =
+      node_handle.advertise<sensor_msgs::PointCloud2>("cepton/points", 2);
 
   // Initialize sdk
   cepton_sdk::SensorError error;
-  NODELET_INFO("cepton_sdk version: %s", cepton_sdk::get_version_string());
+  NODELET_INFO("cepton_sdk %s", cepton_sdk::get_version_string());
 
   error = error_callback.listen([this](cepton_sdk::SensorHandle handle,
                                        const cepton_sdk::SensorError &error) {
@@ -65,7 +84,7 @@ void DriverNodelet::onInit() {
 
   auto options = cepton_sdk::create_options();
   options.control_flags = control_flags;
-  options.frame.mode = CEPTON_SDK_FRAME_CYCLE;
+  options.frame.mode = frame_mode;
   error = cepton_sdk::initialize(
       CEPTON_SDK_VERSION, options,
       &cepton_sdk::api::SensorErrorCallback::global_on_callback,
@@ -76,6 +95,8 @@ void DriverNodelet::onInit() {
   if (!capture_path.empty()) {
     error = cepton_sdk::api::open_replay(capture_path);
     FATAL_ERROR(error)
+    error = cepton_sdk::capture_replay::set_enable_loop(true);
+    FATAL_ERROR(error);
     error = cepton_sdk::capture_replay::resume();
     FATAL_ERROR(error)
   }
@@ -85,38 +106,6 @@ void DriverNodelet::onInit() {
   FATAL_ERROR(error);
   error = image_frame_callback.listen(this, &DriverNodelet::on_image_points);
   FATAL_ERROR(error)
-}
-
-std::string DriverNodelet::get_points_topic_id(
-    uint64_t sensor_serial_number) const {
-  if (combine_sensors) {
-    return (output_namespace + "/points");
-  } else {
-    return (output_namespace + "/points/" +
-            std::to_string(sensor_serial_number));
-  }
-}
-
-std::string DriverNodelet::get_frame_id(uint64_t sensor_serial_number) const {
-  if (combine_sensors) {
-    return output_namespace;
-  } else {
-    return (output_namespace + "_" + std::to_string(sensor_serial_number));
-  }
-}
-
-ros::Publisher &DriverNodelet::get_points_publisher(
-    uint64_t sensor_serial_number) {
-  if (combine_sensors) {
-    return combined_points_publisher;
-  } else {
-    if (!points_publishers.count(sensor_serial_number)) {
-      std::string topic_id = get_points_topic_id(sensor_serial_number);
-      points_publishers[sensor_serial_number] =
-          node_handle.advertise<CeptonPointCloud>(topic_id, 1);
-    }
-    return points_publishers.at(sensor_serial_number);
-  }
 }
 
 void DriverNodelet::on_image_points(
@@ -139,60 +128,49 @@ void DriverNodelet::on_image_points(
   publish_sensor_information(sensor_info);
 
   // Publish points
-  uint64_t message_timestamp = pcl_conversions::toPCL(ros::Time::now());
-  publish_points(sensor_info.serial_number, message_timestamp);
+  publish_points(sensor_info.serial_number);
   image_points.clear();
   points.clear();
 }
 
 void DriverNodelet::publish_sensor_information(
-    const CeptonSensorInformation &sensor_information) {
-  cepton_ros::SensorInformation msg;
-  msg.handle = sensor_information.handle;
-  msg.serial_number = sensor_information.serial_number;
-  msg.model_name = sensor_information.model_name;
-  msg.model = sensor_information.model;
-  msg.firmware_version = sensor_information.firmware_version;
+    const cepton_sdk::SensorInformation &sensor_information) {
+  cepton_ros::SensorInformationStamped msg;
+  msg.header.stamp = ros::Time::now();
+  msg.info.handle = sensor_information.handle;
+  msg.info.serial_number = sensor_information.serial_number;
+  msg.info.model_name = sensor_information.model_name;
+  msg.info.model = sensor_information.model;
+  msg.info.firmware_version = sensor_information.firmware_version;
+  const uint8_t *const sensor_information_bytes =
+      (const uint8_t *)&sensor_information;
+  msg.info.data = std::vector<uint8_t>(
+      sensor_information_bytes,
+      sensor_information_bytes + sizeof(sensor_information));
   sensor_information_publisher.publish(msg);
 }
 
-void DriverNodelet::publish_points(uint64_t sensor_serial_number,
-                                   uint64_t message_timestamp) {
+void DriverNodelet::publish_points(uint64_t sensor_serial_number) {
   // Convert image points to points
   points.clear();
   points.resize(image_points.size());
-  std::size_t i_point = 0;
-  for (const auto &image_point : image_points) {
-    if (image_point.distance == 0.0f) continue;
-    cepton_sdk::util::convert_sensor_image_point_to_point(image_point,
-                                                          points[i_point]);
-    ++i_point;
+  for (int i = 0; i < image_points.size(); ++i) {
+    cepton_sdk::util::convert_sensor_image_point_to_point(image_points[i],
+                                                          points[i]);
   }
-  points.resize(i_point);
 
-  CeptonPointCloud point_cloud;
-  point_cloud.header.stamp = message_timestamp;
-  point_cloud.header.frame_id = get_frame_id(sensor_serial_number);
+  point_cloud.clear();
+  point_cloud.header.stamp = rosutil::to_usec(ros::Time::now());
+  point_cloud.header.frame_id =
+      (combine_sensors) ? "cepton_0"
+                        : ("cepton_" + std::to_string(sensor_serial_number));
   point_cloud.height = 1;
   point_cloud.width = points.size();
   point_cloud.resize(points.size());
-  for (std::size_t i_point = 0; i_point < points.size(); ++i_point) {
-    const auto &cepton_point = points[i_point];
-    auto &pcl_point = point_cloud.points[i_point];
-    pcl_point.timestamp = cepton_point.timestamp;
-    pcl_point.image_x = cepton_point.image_x;
-    pcl_point.image_z = cepton_point.image_z;
-    pcl_point.distance = cepton_point.distance;
-    pcl_point.x = cepton_point.x;
-    pcl_point.y = cepton_point.y;
-    pcl_point.z = cepton_point.z;
-    pcl_point.intensity = cepton_point.intensity;
-    pcl_point.return_type = cepton_point.return_type;
-    pcl_point.valid = cepton_point.valid;
-    pcl_point.saturated = cepton_point.saturated;
+  for (std::size_t i = 0; i < points.size(); ++i) {
+    point_cloud.points[i] = points[i];
   }
-
-  get_points_publisher(sensor_serial_number).publish(point_cloud);
+  points_publisher.publish(point_cloud);
 }
 
 }  // namespace cepton_ros

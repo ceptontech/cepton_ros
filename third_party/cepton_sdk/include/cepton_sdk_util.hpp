@@ -87,12 +87,42 @@ inline void convert_image_point_to_point(float image_x, float image_z,
 }
 
 /// 3d point class.
-struct SensorPoint : public SensorImagePoint {
-  float x;
-  float y;
-  float z;
-  uint8_t reserved;
+/**
+ * Can't subclass from SensorImagePoint, needs to be POD.
+ */
+struct SensorPoint {
+  int64_t timestamp;  ///< Unix time [microseconds].
+  float image_x;      ///< x image coordinate.
+  float distance;     ///< Distance [meters].
+  float image_z;      ///< z image coordinate.
+  float intensity;    ///< Diffuse reflectance.
+  CeptonSensorReturnType return_type;
+
+#ifdef SIMPLE
+  /// bit flags
+  /**
+   * 1. `valid`: If `false`, then the distance and intensity are invalid.
+   * 2. `saturated`: If `true`, then the intensity is invalid. Also, the
+   * distance is valid, but inaccurate.
+   */
+  uint8_t flags;
+#else
+  union {
+    uint8_t flags;
+    struct {
+      uint8_t valid : 1;
+      uint8_t saturated : 1;
+    };
+  };
+#endif
+  uint8_t reserved[6];
+
+  float x;  ///< x cartesian coordinate
+  float y;  ///< y cartesian coordinate
+  float z;  ///< z cartesian coordinate
 };
+static_assert(offsetof(cepton_sdk::util::SensorPoint, x) ==
+              sizeof(cepton_sdk::SensorImagePoint));
 
 /// Convenience method to convert `cepton_sdk::SensorImagePoint` to
 /// `cepton_sdk::SensorPoint`.
