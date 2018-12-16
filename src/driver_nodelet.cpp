@@ -115,21 +115,17 @@ void DriverNodelet::on_image_points(
     const cepton_sdk::SensorImagePoint *const c_image_points) {
   cepton_sdk::SensorError error;
 
-  // Get sensor info
+  // Publish sensor information
   cepton_sdk::SensorInformation sensor_info;
   error = cepton_sdk::get_sensor_information(handle, sensor_info);
   WARN_ERROR(error)
+  publish_sensor_information(sensor_info);
 
-  // Cache image points
+  // Publish points
   image_points.reserve(n_points);
   for (std::size_t i = 0; i < n_points; ++i) {
     image_points.push_back(c_image_points[i]);
   }
-
-  // Publish sensor info
-  publish_sensor_information(sensor_info);
-
-  // Publish points
   publish_points(sensor_info.serial_number);
   image_points.clear();
   points.clear();
@@ -138,11 +134,40 @@ void DriverNodelet::on_image_points(
 void DriverNodelet::publish_sensor_information(
     const cepton_sdk::SensorInformation &sensor_information) {
   cepton_ros::SensorInformation msg;
+  msg.header.stamp = ros::Time::now();
+
   msg.handle = sensor_information.handle;
   msg.serial_number = sensor_information.serial_number;
   msg.model_name = sensor_information.model_name;
   msg.model = sensor_information.model;
   msg.firmware_version = sensor_information.firmware_version;
+
+  msg.last_reported_temperature = sensor_information.last_reported_temperature;
+  msg.last_reported_humidity = sensor_information.last_reported_humidity;
+  msg.last_reported_age = sensor_information.last_reported_age;
+
+  msg.measurement_period = sensor_information.measurement_period;
+
+  msg.ptp_ts = sensor_information.ptp_ts;
+
+  msg.gps_ts_year = sensor_information.gps_ts_year;
+  msg.gps_ts_month = sensor_information.gps_ts_month;
+  msg.gps_ts_day = sensor_information.gps_ts_day;
+  msg.gps_ts_hour = sensor_information.gps_ts_hour;
+  msg.gps_ts_min = sensor_information.gps_ts_min;
+  msg.gps_ts_sec = sensor_information.gps_ts_sec;
+
+  msg.return_count = sensor_information.return_count;
+  msg.segment_count = sensor_information.segment_count;
+
+  msg.is_mocked = sensor_information.is_mocked;
+  msg.is_pps_connected = sensor_information.is_pps_connected;
+  msg.is_nmea_connected = sensor_information.is_nmea_connected;
+  msg.is_ptp_connected = sensor_information.is_ptp_connected;
+  msg.is_calibrated = sensor_information.is_calibrated;
+  msg.is_over_heated = sensor_information.is_over_heated;
+
+  msg.cepton_sdk_version = CEPTON_SDK_VERSION;
   const uint8_t *const sensor_information_bytes =
       (const uint8_t *)&sensor_information;
   msg.data = std::vector<uint8_t>(
