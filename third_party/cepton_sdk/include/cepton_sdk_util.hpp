@@ -121,8 +121,6 @@ struct SensorPoint {
   float y;  ///< y cartesian coordinate
   float z;  ///< z cartesian coordinate
 };
-static_assert(offsetof(cepton_sdk::util::SensorPoint, x) ==
-              sizeof(cepton_sdk::SensorImagePoint));
 
 /// Convenience method to convert `cepton_sdk::SensorImagePoint` to
 /// `cepton_sdk::SensorPoint`.

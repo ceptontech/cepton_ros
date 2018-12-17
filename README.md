@@ -48,15 +48,21 @@ roslaunch cepton_ros demo.launch
 
 A rviz window should popup showing a sample point cloud.
 
-### Using multiple sensors
-
-Multiple sensors can be viewed using the `driver_multi.launch` file. The driver will publish separate topics and transforms for each sensor.
+You can launch the driver standalone as
 
 ```sh
-roslaunch cepton_ros driver_multi.launch transforms_path:=<transforms_file>
+roslaunch cepton_ros driver.launch
 ```
 
-A sample transforms file can be found at `samples/cepton_transforms.json`. The rotation is in quaternion format `<x, y, z, w>`. The coordinate system is as follows: `+x` = right, `+y` = forward, `+z` = up.
+### Using multiple sensors
+
+If the `transforms_path` parameter is passed, the driver will output each sensor point cloud with a unique tf frame id.
+
+```sh
+roslaunch cepton_ros driver.launch transforms_path:=<path_to_cepton_transforms.json>
+```
+
+A sample transforms file can be found at `launch/settings/cepton_transforms.json`. The rotation is in Quaternion format `<x, y, z, w>`. The coordinate system is as follows: `+x` = right, `+y` = forward, `+z` = up.
 
 ## Capture Replay
 

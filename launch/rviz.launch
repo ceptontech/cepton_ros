@@ -1,3 +1,4 @@
+<!-- Launches rviz with default config. -->
 <launch>
   <arg name="rviz_config_path" default="$(find cepton_ros)/launch/settings/rviz_config.rviz" doc="rviz config file path"/>
 

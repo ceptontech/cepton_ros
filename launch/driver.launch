@@ -1,3 +1,4 @@
+<!-- Launches nodelet manager, SDK driver, and transforms publisher. -->
 <launch>
   <arg name="capture_loop" default="true" doc="capture replay loop"/>
   <arg name="capture_path" default="" doc="capture replay file path"/>

@@ -10,6 +10,10 @@
 
 namespace cepton_ros {
 
+/// SDK nodelet.
+/**
+ * Publishes sensor information and points topics.
+ */
 class DriverNodelet : public nodelet::Nodelet {
  public:
   ~DriverNodelet();

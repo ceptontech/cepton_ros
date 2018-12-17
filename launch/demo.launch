@@ -1,3 +1,4 @@
+<!-- Launches SDK driver and rviz. -->
 <launch>
   <arg name="capture_path" default="" doc="capture replay file path"/>
   <arg name="rviz_config_path" default="$(find cepton_ros)/launch/settings/rviz_config.rviz" doc="rviz config file path"/>

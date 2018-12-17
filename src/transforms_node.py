@@ -12,6 +12,7 @@ import tf
 
 
 class TransformsNode(object):
+    """Publishes transforms from cepton_transforms.json file."""
     def __init__(self):
         rospy.init_node("cepton_transforms")
         self.rate = rospy.Rate(rospy.get_param("~rate", 10))
