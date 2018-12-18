@@ -4,10 +4,14 @@
   <arg name="rviz_config_path" default="$(find cepton_ros)/launch/settings/rviz_config.rviz" doc="rviz config file path"/>
   <arg name="transforms_path" default="" doc="transforms json file path"/>
 
+  <include file="$(find cepton_ros)/launch/manager.launch"/>
+
   <include file="$(find cepton_ros)/launch/driver.launch">
     <arg name="capture_path" value="$(arg capture_path)"/>
     <arg name="transforms_path" value="$(arg transforms_path)"/>
   </include>
 
-  <node pkg="rviz" type="rviz" name="cepton_rviz" required="true" args="-d $(arg rviz_config_path)"/>
+  <!-- <include file="$(find cepton_ros)/launch/rviz.launch">
+    <arg name="rviz_config_path" value="$(arg rviz_config_path)"/>
+  </include> -->
 </launch>

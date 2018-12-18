@@ -3,9 +3,13 @@
 #include <string>
 
 #include <nodelet/nodelet.h>
+#include <pcl_ros/point_cloud.h>
 #include <ros/ros.h>
+#include <sensor_msgs/PointCloud2.h>
 #include <cepton_sdk_api.hpp>
 
+#include "cepton_ros/SensorInformation.h"
+#include "cepton_ros/common.hpp"
 #include "cepton_ros/point.hpp"
 
 namespace cepton_ros {

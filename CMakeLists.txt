@@ -44,6 +44,7 @@ include_directories("${PROJECT_SOURCE_DIR}/include")
 add_message_files(FILES
   SensorInformation.msg
 )
+
 generate_messages(DEPENDENCIES
   std_msgs
 )

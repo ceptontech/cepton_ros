@@ -12,7 +12,7 @@ using CeptonPointCloud = pcl::PointCloud<cepton_sdk::util::SensorPoint>;
 
 // clang-format off
 POINT_CLOUD_REGISTER_POINT_STRUCT(cepton_sdk::util::SensorPoint,
-    // (int64_t, timestamp, timestamp) int64_t not supported in PCL
+    (double, timestamp, timestamp) // int64_t not supported in PCL
     (float, image_x, image_x)
     (float, distance, distance)
     (float, image_z, image_z)

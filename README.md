@@ -48,9 +48,16 @@ roslaunch cepton_ros demo.launch
 
 A rviz window should popup showing a sample point cloud.
 
-You can launch the driver standalone as
+To launch the driver standalone, you need to first launch the nodelet manager
 
 ```sh
+roslaunch cepton_ros manager.launch
+```
+
+Then, you can launch the driver
+
+```sh
+
 roslaunch cepton_ros driver.launch
 ```
 
