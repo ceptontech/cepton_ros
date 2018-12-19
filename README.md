@@ -2,9 +2,9 @@
 
 ## Overview
 
-This package provides ROS support for the Cepton LIDAR sensor.
+This package provides ROS support for the Cepton SDK.
 
-Before using this ROS driver, we recommend that you download CeptonViewer.
+Before using this ROS driver, we recommend that you download CeptonViewer to test your sensor setup.
 
 ## Compatibility
 
