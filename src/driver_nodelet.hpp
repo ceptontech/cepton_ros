@@ -31,8 +31,8 @@ class DriverNodelet : public nodelet::Nodelet {
 
  private:
   void publish_sensor_information(
-      const cepton_sdk::SensorInformation &sensor_information);
-  void publish_points(uint64_t sensor_serial_number);
+      const cepton_sdk::SensorInformation &sensor_info);
+  void publish_points(uint64_t serial_number);
 
  private:
   ros::NodeHandle node_handle;
@@ -44,7 +44,7 @@ class DriverNodelet : public nodelet::Nodelet {
   cepton_sdk::api::SensorImageFrameCallback image_frame_callback;
 
   ros::Timer timer;
-  ros::Publisher sensor_information_publisher;
+  ros::Publisher sensor_info_publisher;
   ros::Publisher points_publisher;
 
   std::vector<cepton_sdk::SensorImagePoint> image_points;

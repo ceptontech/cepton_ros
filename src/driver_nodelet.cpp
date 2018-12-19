@@ -35,7 +35,7 @@ void DriverNodelet::onInit() {
   private_node_handle.param("frame_mode", frame_mode_str, frame_mode_str);
   const cepton_sdk::FrameMode frame_mode = frame_mode_lut.at(frame_mode_str);
 
-  sensor_information_publisher =
+  sensor_info_publisher =
       node_handle.advertise<SensorInformation>("cepton/sensor_information", 2);
   points_publisher =
       node_handle.advertise<CeptonPointCloud>("cepton/points", 2);
@@ -99,51 +99,49 @@ void DriverNodelet::on_image_points(
 }
 
 void DriverNodelet::publish_sensor_information(
-    const cepton_sdk::SensorInformation &sensor_information) {
+    const cepton_sdk::SensorInformation &sensor_info) {
   cepton_ros::SensorInformation msg;
   msg.header.stamp = ros::Time::now();
 
-  msg.handle = sensor_information.handle;
-  msg.serial_number = sensor_information.serial_number;
-  msg.model_name = sensor_information.model_name;
-  msg.model = sensor_information.model;
-  msg.firmware_version = sensor_information.firmware_version;
+  msg.handle = sensor_info.handle;
+  msg.serial_number = sensor_info.serial_number;
+  msg.model_name = sensor_info.model_name;
+  msg.model = sensor_info.model;
+  msg.firmware_version = sensor_info.firmware_version;
 
-  msg.last_reported_temperature = sensor_information.last_reported_temperature;
-  msg.last_reported_humidity = sensor_information.last_reported_humidity;
-  msg.last_reported_age = sensor_information.last_reported_age;
+  msg.last_reported_temperature = sensor_info.last_reported_temperature;
+  msg.last_reported_humidity = sensor_info.last_reported_humidity;
+  msg.last_reported_age = sensor_info.last_reported_age;
 
-  msg.measurement_period = sensor_information.measurement_period;
+  msg.measurement_period = sensor_info.measurement_period;
 
-  msg.ptp_ts = sensor_information.ptp_ts;
+  msg.ptp_ts = sensor_info.ptp_ts;
 
-  msg.gps_ts_year = sensor_information.gps_ts_year;
-  msg.gps_ts_month = sensor_information.gps_ts_month;
-  msg.gps_ts_day = sensor_information.gps_ts_day;
-  msg.gps_ts_hour = sensor_information.gps_ts_hour;
-  msg.gps_ts_min = sensor_information.gps_ts_min;
-  msg.gps_ts_sec = sensor_information.gps_ts_sec;
+  msg.gps_ts_year = sensor_info.gps_ts_year;
+  msg.gps_ts_month = sensor_info.gps_ts_month;
+  msg.gps_ts_day = sensor_info.gps_ts_day;
+  msg.gps_ts_hour = sensor_info.gps_ts_hour;
+  msg.gps_ts_min = sensor_info.gps_ts_min;
+  msg.gps_ts_sec = sensor_info.gps_ts_sec;
 
-  msg.return_count = sensor_information.return_count;
-  msg.segment_count = sensor_information.segment_count;
+  msg.return_count = sensor_info.return_count;
+  msg.segment_count = sensor_info.segment_count;
 
-  msg.is_mocked = sensor_information.is_mocked;
-  msg.is_pps_connected = sensor_information.is_pps_connected;
-  msg.is_nmea_connected = sensor_information.is_nmea_connected;
-  msg.is_ptp_connected = sensor_information.is_ptp_connected;
-  msg.is_calibrated = sensor_information.is_calibrated;
-  msg.is_over_heated = sensor_information.is_over_heated;
+  msg.is_mocked = sensor_info.is_mocked;
+  msg.is_pps_connected = sensor_info.is_pps_connected;
+  msg.is_nmea_connected = sensor_info.is_nmea_connected;
+  msg.is_ptp_connected = sensor_info.is_ptp_connected;
+  msg.is_calibrated = sensor_info.is_calibrated;
+  msg.is_over_heated = sensor_info.is_over_heated;
 
   msg.cepton_sdk_version = CEPTON_SDK_VERSION;
-  const uint8_t *const sensor_information_bytes =
-      (const uint8_t *)&sensor_information;
-  msg.data = std::vector<uint8_t>(
-      sensor_information_bytes,
-      sensor_information_bytes + sizeof(sensor_information));
-  sensor_information_publisher.publish(msg);
+  const uint8_t *const sensor_info_bytes = (const uint8_t *)&sensor_info;
+  msg.data = std::vector<uint8_t>(sensor_info_bytes,
+                                  sensor_info_bytes + sizeof(sensor_info));
+  sensor_info_publisher.publish(msg);
 }
 
-void DriverNodelet::publish_points(uint64_t sensor_serial_number) {
+void DriverNodelet::publish_points(uint64_t serial_number) {
   // Convert image points to points
   points.clear();
   points.resize(image_points.size());
@@ -156,7 +154,7 @@ void DriverNodelet::publish_points(uint64_t sensor_serial_number) {
   point_cloud.header.stamp = rosutil::to_usec(ros::Time::now());
   point_cloud.header.frame_id =
       (combine_sensors) ? "cepton_0"
-                        : ("cepton_" + std::to_string(sensor_serial_number));
+                        : ("cepton_" + std::to_string(serial_number));
   point_cloud.height = 1;
   point_cloud.width = points.size();
   point_cloud.resize(points.size());

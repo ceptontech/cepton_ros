@@ -7,7 +7,6 @@ Depends on `manager.launch`.
   <arg name="capture_path" default="" doc="capture replay file path"/>
   <arg name="control_flags" default="0" doc="sdk control flags"/>
   <arg name="frame_mode" default="CYCLE" doc="sdk frame mode"/>
-  <arg name="parent_frame_id" default="world" doc="parent transform frame"/>
   <arg name="transforms_path" default="" doc="transforms json file path"/>
 
   <arg name="combine_sensors" value="$(eval transforms_path == '')"/>
@@ -21,7 +20,6 @@ Depends on `manager.launch`.
   </node>
 
   <include file="$(find cepton_ros)/launch/transforms.launch">
-    <arg name="parent_frame_id" value="$(arg parent_frame_id)"/>
     <arg name="transforms_path" value="$(find cepton_ros)/launch/settings/cepton_transforms.json" if="$(arg combine_sensors)"/>
     <arg name="transforms_path" value="$(arg transforms_path)" unless="$(arg combine_sensors)"/>
   </include>

@@ -18,7 +18,7 @@ class TransformsNode(object):
         self.rate = rospy.Rate(rospy.get_param("~rate", 10))
         self.transform_broadcaster = tf.TransformBroadcaster()
 
-        self.parent_frame_id = rospy.get_param("~parent_frame_id", "world")
+        self.parent_frame_id = rospy.get_param("~parent_frame_id", "cepton")
 
         self.transforms_dict = {}
         transforms_path = rospy.get_param("~transforms_path", "")

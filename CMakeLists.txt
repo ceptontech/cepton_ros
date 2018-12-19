@@ -34,7 +34,7 @@ include_directories(SYSTEM ${catkin_INCLUDE_DIRS})
 set(CEPTON_SDK_SOURCE_DIR "${PROJECT_SOURCE_DIR}/third_party/cepton_sdk")
 include_directories(SYSTEM "${CEPTON_SDK_SOURCE_DIR}/include")
 list(APPEND CEPTON_ROS_EXTERNAL_LIBRARIES 
-  "${CEPTON_SDK_SOURCE_DIR}/lib/${OS_NAME}/libcepton_sdk.a")
+  "${CEPTON_SDK_SOURCE_DIR}/lib/${OS_NAME}/libcepton_sdk.so")
 
 # ------------------------------------------------------------------------------
 # Targets
@@ -50,7 +50,7 @@ generate_messages(DEPENDENCIES
 )
 
 file(GLOB_RECURSE CEPTON_ROS_SOURCES
-  "${PROJECT_SOURCE_DIR}/src/*.cpp")
+  "${PROJECT_SOURCE_DIR}/src/*.c*")
 add_library(cepton_ros ${CEPTON_ROS_SOURCES})
 target_link_libraries(cepton_ros
   ${catkin_LIBRARIES}

@@ -2,7 +2,7 @@
 <launch>
   <arg name="transforms_path" doc="transforms file path"/>
 
-  <arg name="parent_frame_id" default="world" doc="parent transform frame"/>
+  <arg name="parent_frame_id" default="cepton" doc="parent transform frame"/>
   <arg name="rate" default="10" doc="output rate"/>
 
   <node pkg="cepton_ros" type="transforms_node.py" name="cepton_transforms" output="screen">
