@@ -1,5 +1,14 @@
 # Cepton ROS Release Notes
 
+## Version 1.10.1 2018-12-19
+* **MAJOR CHANGES**.
+* Remove `driver_single.launch` and `driver_multi.launch`. Call `driver.launch` directly.
+* All points output on single topic `cepton/points`.
+* If `transforms_path` is provided during launch, point cloud tf frames are `cepton_<serial_number>`. Otherwise, they are `cepton_0`.
+* Add `SubscriberNodelet` for sample subscriber code and debugging.
+* Add more launch files for individual components. See `demo.launch`.
+* Switch to using dynamic SDK library.
+
 ## Version 1.10 2018-12-10
 * Update SDK.
 
