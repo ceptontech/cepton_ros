@@ -8,7 +8,7 @@ Before using this ROS driver, we recommend that you download CeptonViewer to tes
 
 ## Compatibility
 
-Currently, this driver only works on Ubuntu.
+Currently, this driver only works on Ubuntu (>=16.04).
 
 ## Installation
 
@@ -59,6 +59,12 @@ Then, you can launch the driver
 ```sh
 
 roslaunch cepton_ros driver.launch
+```
+
+You can print a help menu for the driver launcher
+
+```sh
+roslaunch --ros-args cepton_ros driver.launch
 ```
 
 ### Using multiple sensors
