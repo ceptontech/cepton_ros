@@ -1,5 +1,8 @@
 # Cepton ROS Release Notes
 
+## Version 1.11 2019-01-25
+* Update sdk.
+
 ## Version 1.10.1 2018-12-19
 * **MAJOR CHANGES**.
 * Remove `driver_single.launch` and `driver_multi.launch`. Call `driver.launch` directly.

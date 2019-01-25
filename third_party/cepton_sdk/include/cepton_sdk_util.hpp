@@ -126,7 +126,7 @@ struct SensorPoint {
 /// `cepton_sdk::SensorPoint`.
 inline void convert_sensor_image_point_to_point(
     const SensorImagePoint &image_point, SensorPoint &point) {
-  *(SensorImagePoint *)(&point) = image_point;
+    *(SensorImagePoint *)(&point) = image_point;
 
   convert_image_point_to_point(image_point.image_x, image_point.image_z,
                                image_point.distance, point.x, point.y, point.z);
@@ -821,9 +821,9 @@ class LargeObjectPool
     }
 
     auto this_ptr = this->shared_from_this();
-    return std::shared_ptr<T>(ptr, [this, this_ptr](T *const ptr) {
-      std::lock_guard<std::mutex> lock(m_mutex);
-      m_free.push_back(ptr);
+    return std::shared_ptr<T>(ptr, [this, this_ptr](T *const ptr_tmp) {
+      std::lock_guard<std::mutex> lock_tmp(m_mutex);
+      m_free.push_back(ptr_tmp);
     });
   }
 
