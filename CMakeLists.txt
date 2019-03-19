@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.1)
 project(cepton_ros
-  VERSION 1.11
+  VERSION 1.12
   LANGUAGES C CXX)
 
 # ------------------------------------------------------------------------------
