@@ -52,6 +52,8 @@ void DriverNodelet::onInit() {
 
   auto options = cepton_sdk::create_options();
   options.control_flags = control_flags;
+  if (!capture_path.empty())
+    options.control_flags |= CEPTON_SDK_CONTROL_DISABLE_NETWORK;
   options.frame.mode = frame_mode;
   if (frame_mode == CEPTON_SDK_FRAME_TIMED) options.frame.length = 0.01f;
   error = cepton_sdk::initialize(

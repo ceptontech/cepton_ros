@@ -56,24 +56,29 @@ generate_messages(DEPENDENCIES
   std_msgs
 )
 
-file(GLOB_RECURSE CEPTON_ROS_SOURCES
-  "${PROJECT_SOURCE_DIR}/src/*.c*")
-add_library(cepton_ros ${CEPTON_ROS_SOURCES})
-target_include_directories(cepton_ros PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-    $<INSTALL_INTERFACE:include>
+set(CEPTON_ROS_LIBRARIES "")
+
+add_library(cepton_ros 
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/common.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/driver_nodelet.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/subscriber_nodelet.cpp"
+)
+list(APPEND CEPTON_ROS_LIBRARIES cepton_ros)
+
+foreach(name IN LISTS CEPTON_ROS_LIBRARIES)
+  target_include_directories(${name} PUBLIC
+      $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+      $<INSTALL_INTERFACE:include>
+    )
+  target_link_libraries(${name}
+    ${catkin_LIBRARIES}
+    ${CEPTON_ROS_THIRD_PARTY_LIBRARIES}
   )
-target_link_libraries(cepton_ros
-  ${catkin_LIBRARIES}
-  ${CEPTON_ROS_THIRD_PARTY_LIBRARIES}
-)
-add_dependencies(cepton_ros 
-  ${catkin_EXPORTED_TARGETS}
-  ${cepton_ros_EXPORTED_TARGETS} 
-)
-set(CEPTON_ROS_LIBRARIES
-  cepton_ros
-)
+  add_dependencies(${name}
+    ${catkin_EXPORTED_TARGETS}
+    ${cepton_ros_EXPORTED_TARGETS} 
+  )
+endforeach()
 
 # ------------------------------------------------------------------------------
 # Install
