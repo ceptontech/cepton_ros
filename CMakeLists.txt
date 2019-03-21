@@ -18,6 +18,7 @@ set(CMAKE_CXX_STANDARD 11)
 # External libraries
 # ------------------------------------------------------------------------------
 # catkin
+# ------
 set(CEPTON_ROS_CATKIN_DEPENDS
   nodelet
   pcl_conversions
@@ -29,12 +30,15 @@ set(CEPTON_ROS_CATKIN_DEPENDS
   std_msgs
   tf
 )
-find_package(catkin REQUIRED COMPONENTS ${CEPTON_ROS_CATKIN_DEPENDS})
+find_package(catkin REQUIRED COMPONENTS 
+  ${CEPTON_ROS_CATKIN_DEPENDS}
+  message_generation)
 include_directories(SYSTEM ${catkin_INCLUDE_DIRS})
 
 set(CEPTON_ROS_THIRD_PARTY_LIBRARIES "")
 
 # cepton_sdk
+# ----------
 set(CEPTON_SDK_USE_STATIC_OPTION FALSE CACHE INTERNAL "" FORCE)
 set(CEPTON_SDK_SOURCE_DIR "${PROJECT_SOURCE_DIR}/third_party/cepton_sdk")
 set(CEPTON_SDK_BINARY_DIR "${PROJECT_BINARY_DIR}/third_party/cepton_sdk")
@@ -44,8 +48,6 @@ list(APPEND CEPTON_ROS_THIRD_PARTY_LIBRARIES cepton_sdk::cepton_sdk)
 # ------------------------------------------------------------------------------
 # Targets
 # ------------------------------------------------------------------------------
-include_directories("${PROJECT_SOURCE_DIR}/include")
-
 add_message_files(FILES
   SensorInformation.msg
 )
@@ -57,11 +59,18 @@ generate_messages(DEPENDENCIES
 file(GLOB_RECURSE CEPTON_ROS_SOURCES
   "${PROJECT_SOURCE_DIR}/src/*.c*")
 add_library(cepton_ros ${CEPTON_ROS_SOURCES})
+target_include_directories(cepton_ros PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+  )
 target_link_libraries(cepton_ros
   ${catkin_LIBRARIES}
   ${CEPTON_ROS_THIRD_PARTY_LIBRARIES}
 )
-add_dependencies(cepton_ros cepton_ros_generate_messages_cpp)
+add_dependencies(cepton_ros 
+  ${catkin_EXPORTED_TARGETS}
+  ${cepton_ros_EXPORTED_TARGETS} 
+)
 set(CEPTON_ROS_LIBRARIES
   cepton_ros
 )
@@ -70,8 +79,25 @@ set(CEPTON_ROS_LIBRARIES
 # Install
 # ------------------------------------------------------------------------------
 catkin_package(
-  CATKIN_DEPENDS ${CEPTON_ROS_CATKIN_DEPENDS}
+  CATKIN_DEPENDS ${CEPTON_ROS_CATKIN_DEPENDS} message_runtime
   DEPENDS
-  INCLUDE_DIRS include
+  INCLUDE_DIRS "include"
   LIBRARIES ${CEPTON_ROS_THIRD_PARTY_LIBRARIES} ${CEPTON_ROS_LIBRARIES}
 )
+
+install(DIRECTORY "include/cepton_ros/"
+  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+)
+
+install(TARGETS ${CEPTON_ROS_LIBRARIES}
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+
+catkin_install_python(PROGRAMS 
+  "src/transforms_node.py"
+  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+
+install(DIRECTORY launch
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
