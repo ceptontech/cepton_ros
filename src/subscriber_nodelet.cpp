@@ -13,7 +13,7 @@ void SubscriberNodelet::on_points(
     const CeptonPointCloud::ConstPtr& point_cloud) {
   const auto& points = point_cloud->points;
   if (points.size() == 0) return;
-  NODELET_INFO("Received %i points.", points.size());
+  NODELET_INFO("Received %i points.", (int)points.size());
   NODELET_INFO("  Timestamp Range: [%li, %li]", (long int)points[0].timestamp,
                (long int)points[points.size() - 1].timestamp);
 
