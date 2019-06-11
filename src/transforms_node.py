@@ -4,6 +4,7 @@ from __future__ import (absolute_import, division, generators, nested_scopes,
                         print_function, unicode_literals, with_statement)
 
 import json
+import os.path
 
 import numpy
 
@@ -13,6 +14,7 @@ import tf
 
 class TransformsNode(object):
     """Publishes transforms from cepton_transforms.json file."""
+
     def __init__(self):
         rospy.init_node("cepton_transforms")
         self.rate = rospy.Rate(rospy.get_param("~rate", 10))
@@ -22,10 +24,13 @@ class TransformsNode(object):
 
         self.transforms_dict = {}
         transforms_path = rospy.get_param("~transforms_path", "")
+        if not os.path.exists(transforms_path):
+            rospy.logwarn("Transforms path does not exist: {}".format(
+                          transforms_path))
+            return
         with open(transforms_path, "r") as f:
-            self.transforms_dict = json.load(f)
-        self.transforms_dict = {
-            int(key): value for key, value in self.transforms_dict.items()}
+            self.transforms_dict = {
+                int(key): value for key, value in json.load(f).items()}
 
     def publish_transforms(self):
         for serial_number, transform_dict in self.transforms_dict.items():
