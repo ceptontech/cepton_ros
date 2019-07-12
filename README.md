@@ -79,7 +79,17 @@ A sample transforms file can be found at `launch/settings/cepton_transforms.json
 
 ## Capture Replay
 
-Refer to the launch files in `tests` for examples on how to replay data from PCAP capture files.
+A PCAP capture file can be converted to a bag file as follows:
+
+```sh
+roslaunch cepton_ros convert_capture.launch capture_path:=<path_to_capture.pcap> output_path:=<path_to_output.bag>
+```
+
+A PCAP capture file can also passed directly to the launch files. For example:
+
+```sh
+roslaunch cepton_ros demo.launch capture_path:=<path_to_capture.pcap>
+```
 
 ## Troubleshooting
 
