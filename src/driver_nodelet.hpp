@@ -43,7 +43,7 @@ class DriverNodelet : public nodelet::Nodelet {
   cepton_sdk::api::SensorErrorCallback error_callback;
   cepton_sdk::api::SensorImageFrameCallback image_frame_callback;
 
-  ros::Timer timer;
+  ros::Timer watchdog_timer;
   ros::Publisher sensor_info_publisher;
   ros::Publisher points_publisher;
 

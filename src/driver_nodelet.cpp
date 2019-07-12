@@ -15,8 +15,8 @@ const std::map<std::string, cepton_sdk::FrameMode> frame_mode_lut = {
 };
 
 void DriverNodelet::onInit() {
-  this->node_handle = getNodeHandle();
-  this->private_node_handle = getPrivateNodeHandle();
+  node_handle = getNodeHandle();
+  private_node_handle = getPrivateNodeHandle();
 
   // Get parameters
   private_node_handle.param("combine_sensors", combine_sensors,
@@ -42,11 +42,12 @@ void DriverNodelet::onInit() {
 
   // Initialize sdk
   cepton_sdk::SensorError error;
-  NODELET_INFO("cepton_sdk %s", cepton_sdk::get_version_string());
+  NODELET_INFO("[%s] cepton_sdk %s", getName().c_str(),
+               cepton_sdk::get_version_string());
 
   error = error_callback.listen([this](cepton_sdk::SensorHandle handle,
                                        const cepton_sdk::SensorError &error) {
-    NODELET_WARN(error.what());
+    NODELET_WARN("[%s] %s", getName().c_str(), error.what());
   });
   FATAL_ERROR(error);
 
@@ -77,6 +78,15 @@ void DriverNodelet::onInit() {
   FATAL_ERROR(error);
   error = image_frame_callback.listen(this, &DriverNodelet::on_image_points);
   FATAL_ERROR(error);
+
+  // Start watchdog timer
+  watchdog_timer = node_handle.createTimer(
+      ros::Duration(0.1), [&](const ros::TimerEvent &event) {
+        if (cepton_sdk::api::is_end()) {
+          NODELET_INFO("[%s] capture replay done", getName().c_str());
+          ros::shutdown();
+        }
+      });
 }
 
 void DriverNodelet::on_image_points(
