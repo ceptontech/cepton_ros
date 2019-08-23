@@ -38,7 +38,8 @@ class TransformsNode(object):
             rotation = transform_dict.get("rotation", [0.0, 0.0, 0.0, 1.0])
             frame_id = "cepton_{}".format(serial_number)
             self.transform_broadcaster.sendTransform(
-                translation, rotation, rospy.Time.now(), frame_id, self.parent_frame_id)
+                translation, rotation, rospy.Time.now() + rospy.Duration(1),
+                frame_id, self.parent_frame_id)
 
     def run(self):
         while not rospy.is_shutdown():
