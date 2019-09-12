@@ -43,7 +43,7 @@ void DriverNodelet::onInit() {
   // Initialize sdk
   cepton_sdk::SensorError error;
   NODELET_INFO("[%s] cepton_sdk %s", getName().c_str(),
-               cepton_sdk::get_version_string());
+               cepton_sdk::get_version_string().c_str());
 
   error = error_callback.listen([this](cepton_sdk::SensorHandle handle,
                                        const cepton_sdk::SensorError &error) {
