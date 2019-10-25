@@ -19,7 +19,7 @@ Change to the catkin workspace directory.
 Clone the repository.
 
 ```sh
-git clone --recursive https://github.com/ceptontech/cepton_ros.git src/cepton_ros
+git clone https://github.com/ceptontech/cepton_ros.git src/cepton_ros
 ```
 
 Run catkin make.
@@ -36,11 +36,9 @@ source devel/setup.bash
 
 ## Getting started
 
-Connect the sensor's ethernet cable to the host computer (we recommend using a USB -> Ethernet adapter). The sensor IP address is of the form `192.168.*.*`, and it sends UDP broadcast packets on port 8808. The sensor will start sending packets as soon as the power is connected.
+First, check that the sensor works using `CeptonViewer`. 
 
-On Ubuntu, it is necessary to assign a static IP address to the host computer's Ethernet interface, e.g. IP=`192.168.0.1`, Netmask=`255.255.0.0`. This can be done through the Network Manager GUI.
-
-First, try viewing the sensor in CeptonViewer, to ensure that it is connected properly. Then, launch the ROS demo (`roscore` must be running already).
+Launch the ROS demo
 
 ```sh
 roslaunch cepton_ros demo.launch
