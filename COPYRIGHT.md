@@ -1,1 +1,0 @@
-Copyright Cepton Technologies Inc. 2017-2019, All rights reserved.
